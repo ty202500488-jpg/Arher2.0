@@ -23,7 +23,16 @@ public class Arena {
         { 350, GROUND_Y - 280, 180, 18 },                       // 5: Upper Left Hanging Vine
         { WIDTH - 530, GROUND_Y - 280, 180, 18 },               // 6: Upper Right Hanging Vine
         { 50, GROUND_Y - 380, 200, 22 },                        // 7: High Left Corner Ledge
-        { WIDTH - 250, GROUND_Y - 380, 200, 22 }                // 8: High Right Corner Ledge
+        { WIDTH - 250, GROUND_Y - 380, 200, 22 },               // 8: High Right Corner Ledge
+        
+        // --- NEW PLATFORMS ---
+        { WIDTH/2 - 400, GROUND_Y - 330, 150, 20 },             // 9: Middle Left Float
+        { WIDTH/2 + 250, GROUND_Y - 330, 150, 20 },             // 10: Middle Right Float
+        { WIDTH/2 - 100, GROUND_Y - 450, 200, 22 },             // 11: Top Center Peak
+        { 400, GROUND_Y - 500, 120, 18 },                       // 12: Sky Step Left
+        { WIDTH - 520, GROUND_Y - 500, 120, 18 },               // 13: Sky Step Right
+        { 200, GROUND_Y - 200, 100, 20 },                       // 14: Side Step Lower Left
+        { WIDTH - 300, GROUND_Y - 200, 100, 20 }                // 15: Side Step Lower Right
     };
 
     private final Rectangle[] platforms;

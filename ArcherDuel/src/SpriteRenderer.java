@@ -9,8 +9,8 @@ import java.util.Random;
  */
 public class SpriteRenderer {
 
-    public static final int FRAME_W = 48;
-    public static final int FRAME_H = 48;
+    public static final int FRAME_W = 72;
+    public static final int FRAME_H = 72;
 
     // Animation row indices
     public static final int ANIM_IDLE  = 0;
@@ -73,12 +73,16 @@ public class SpriteRenderer {
                 int ox = f * FRAME_W;
                 int oy = row * FRAME_H;
                 
+                Graphics2D frameG = (Graphics2D) g.create(ox, oy, FRAME_W, FRAME_H);
+                frameG.scale(1.5, 1.5);
+
                 switch(row) {
-                    case ANIM_IDLE:  drawIdle(g, ox, oy, f, pal); break;
-                    case ANIM_WALK:  drawWalk(g, ox, oy, f, pal); break;
-                    case ANIM_SHOOT: drawShoot(g, ox, oy, f, pal); break;
-                    case ANIM_DEATH: drawDeath(g, ox, oy, f, pal); break;
+                    case ANIM_IDLE:  drawIdle(frameG, 0, 0, f, pal); break;
+                    case ANIM_WALK:  drawWalk(frameG, 0, 0, f, pal); break;
+                    case ANIM_SHOOT: drawShoot(frameG, 0, 0, f, pal); break;
+                    case ANIM_DEATH: drawDeath(frameG, 0, 0, f, pal); break;
                 }
+                frameG.dispose();
             }
         }
         g.dispose();

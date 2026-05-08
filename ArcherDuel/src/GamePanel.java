@@ -12,26 +12,29 @@ public class GamePanel extends JPanel implements KeyListener, ActionListener {
 
     // --- constants ---
     private static final int TARGET_FPS = 60;
-    private static final int TICK_MS    = 1000 / TARGET_FPS;
+    private static final int TICK_MS = 1000 / TARGET_FPS;
 
     // --- game objects ---
-    private Arena          arena;
-    private Player         player1, player2;
+    private Arena arena;
+    private Player player1, player2;
     private SpriteRenderer sprites;
 
     // --- game state ---
     // Added START_MENU state
-    private enum GameState { START_MENU, COUNTDOWN, PLAYING, OVER }
+    private enum GameState {
+        START_MENU, COUNTDOWN, PLAYING, OVER
+    }
+
     private GameState state = GameState.START_MENU;
 
-    private int    winner        = -1;
-    private int    countdownTick = 0;
-    private int    flashAlpha    = 0;
-    private String winnerText    = "";
-    
+    private int winner = -1;
+    private int countdownTick = 0;
+    private int flashAlpha = 0;
+    private String winnerText = "";
+
     // UI pulse animation for the loading screen
-    private float  pulse        = 0; 
-    private boolean pulseUp     = true;
+    private float pulse = 0;
+    private boolean pulseUp = true;
 
     private final List<Particle> particles = new ArrayList<>();
     private final Timer timer;
@@ -44,22 +47,23 @@ public class GamePanel extends JPanel implements KeyListener, ActionListener {
         addKeyListener(this);
 
         sprites = new SpriteRenderer();
-        
+
         // Initial setup but don't start countdown yet
-        resetEntities(); 
+        resetEntities();
 
         timer = new Timer(TICK_MS, this);
         timer.start();
+        AudioManager.startBGM();
     }
 
     private void resetEntities() {
-        arena   = new Arena();
-        player1 = new Player(0, 80,  Arena.GROUND_Y - Player.H, sprites);
+        arena = new Arena();
+        player1 = new Player(0, 80, Arena.GROUND_Y - Player.H, sprites);
         player2 = new Player(1, GameWindow.WIDTH - 80 - Player.W,
-                                Arena.GROUND_Y - Player.H, sprites);
+                Arena.GROUND_Y - Player.H, sprites);
         particles.clear();
-        winner       = -1;
-        flashAlpha   = 0;
+        winner = -1;
+        flashAlpha = 0;
         countdownTick = 0;
     }
 
@@ -77,12 +81,13 @@ public class GamePanel extends JPanel implements KeyListener, ActionListener {
     private void update() {
         switch (state) {
             case START_MENU -> updateMenu();
-            case COUNTDOWN  -> {
+            case COUNTDOWN -> {
                 countdownTick++;
-                if (countdownTick >= 180) state = GameState.PLAYING;
+                if (countdownTick >= 180)
+                    state = GameState.PLAYING;
             }
-            case PLAYING    -> updatePlaying();
-            case OVER       -> updateOver();
+            case PLAYING -> updatePlaying();
+            case OVER -> updateOver();
         }
     }
 
@@ -90,10 +95,12 @@ public class GamePanel extends JPanel implements KeyListener, ActionListener {
         // Animate the "Press Enter" pulse
         if (pulseUp) {
             pulse += 0.05f;
-            if (pulse >= 1.0f) pulseUp = false;
+            if (pulse >= 1.0f)
+                pulseUp = false;
         } else {
             pulse -= 0.05f;
-            if (pulse <= 0.3f) pulseUp = true;
+            if (pulse <= 0.3f)
+                pulseUp = true;
         }
     }
 
@@ -103,7 +110,8 @@ public class GamePanel extends JPanel implements KeyListener, ActionListener {
         player2.update(platforms);
         checkArrowCollisions();
         updateParticles();
-        if (flashAlpha > 0) flashAlpha -= 12;
+        if (flashAlpha > 0)
+            flashAlpha -= 12;
     }
 
     private void updateOver() {
@@ -111,7 +119,8 @@ public class GamePanel extends JPanel implements KeyListener, ActionListener {
         player1.update(platforms);
         player2.update(platforms);
         updateParticles();
-        if (flashAlpha > 0) flashAlpha -= 8;
+        if (flashAlpha > 0)
+            flashAlpha -= 8;
     }
 
     private void checkArrowCollisions() {
@@ -120,10 +129,12 @@ public class GamePanel extends JPanel implements KeyListener, ActionListener {
     }
 
     private void checkHit(Player shooter, Player target) {
-        if (!target.isAlive()) return;
+        if (!target.isAlive())
+            return;
         Rectangle targetBounds = target.getBounds();
         for (Arrow arrow : shooter.arrows) {
-            if (!arrow.active) continue;
+            if (!arrow.active)
+                continue;
             if (arrow.getBounds().intersects(targetBounds)) {
                 arrow.active = false;
                 killPlayer(target);
@@ -134,11 +145,13 @@ public class GamePanel extends JPanel implements KeyListener, ActionListener {
 
     private void killPlayer(Player p) {
         p.die();
-        winner     = (p.playerIndex == 0) ? 2 : 1;
+        winner = (p.playerIndex == 0) ? 2 : 1;
         winnerText = "Player " + winner + " Wins!";
-        state      = GameState.OVER;
+        state = GameState.OVER;
         flashAlpha = 255;
         spawnDeathParticles(p.getCenterX(), p.getCenterY(), p.playerIndex);
+        AudioManager.play(AudioManager.Sound.HIT);
+        AudioManager.play(AudioManager.Sound.WIN);
     }
 
     private void spawnDeathParticles(float cx, float cy, int playerIdx) {
@@ -177,8 +190,10 @@ public class GamePanel extends JPanel implements KeyListener, ActionListener {
             drawParticles(g);
             drawHUD(g);
 
-            if (state == GameState.COUNTDOWN) drawCountdown(g);
-            if (state == GameState.OVER)      drawWinScreen(g);
+            if (state == GameState.COUNTDOWN)
+                drawCountdown(g);
+            if (state == GameState.OVER)
+                drawWinScreen(g);
 
             if (flashAlpha > 0) {
                 g.setColor(new Color(255, 255, 255, Math.min(flashAlpha, 180)));
@@ -194,23 +209,25 @@ public class GamePanel extends JPanel implements KeyListener, ActionListener {
         // Background
         g.setColor(new Color(10, 10, 25));
         g.fillRect(0, 0, GameWindow.WIDTH, GameWindow.HEIGHT);
-        
+
         // Title
-        drawDropShadowText(g, "ARROW BRAWL", GameWindow.WIDTH/2, GameWindow.HEIGHT/2 - 80, 
-                           new Font("Monospaced", Font.BOLD, 80), Color.CYAN, 8);
+        drawDropShadowText(g, "ARROW BRAWL", GameWindow.WIDTH / 2, GameWindow.HEIGHT / 2 - 80,
+                new Font("Monospaced", Font.BOLD, 80), Color.CYAN, 8);
 
         // Subtitle / Instructions
         g.setFont(new Font("Monospaced", Font.PLAIN, 18));
         g.setColor(Color.GRAY);
-        String p1Keys = "P1: WASD to Move, T to Shoot";
-        String p2Keys = "P2: ARROWS to Move, I to Shoot";
-        g.drawString(p1Keys, GameWindow.WIDTH/2 - g.getFontMetrics().stringWidth(p1Keys)/2, GameWindow.HEIGHT/2 + 80);
-        g.drawString(p2Keys, GameWindow.WIDTH/2 - g.getFontMetrics().stringWidth(p2Keys)/2, GameWindow.HEIGHT/2 + 110);
+        String p1Keys = "P1: WASD to Move, Space to Shoot";
+        String p2Keys = "P2: ARROWS to Move, Num 1 to Shoot";
+        g.drawString(p1Keys, GameWindow.WIDTH / 2 - g.getFontMetrics().stringWidth(p1Keys) / 2,
+                GameWindow.HEIGHT / 2 + 80);
+        g.drawString(p2Keys, GameWindow.WIDTH / 2 - g.getFontMetrics().stringWidth(p2Keys) / 2,
+                GameWindow.HEIGHT / 2 + 110);
 
         // Pulse "Press Enter"
-        int alpha = (int)(pulse * 255);
-        drawDropShadowText(g, "PRESS [ENTER] TO PLAY", GameWindow.WIDTH/2, GameWindow.HEIGHT/2 + 20, 
-                           new Font("Monospaced", Font.BOLD, 32), new Color(255, 255, 255, alpha), 4);
+        int alpha = (int) (pulse * 255);
+        drawDropShadowText(g, "PRESS [ENTER] TO PLAY", GameWindow.WIDTH / 2, GameWindow.HEIGHT / 2 + 20,
+                new Font("Monospaced", Font.BOLD, 32), new Color(255, 255, 255, alpha), 4);
     }
 
     private void drawParticles(Graphics2D g) {
@@ -221,8 +238,9 @@ public class GamePanel extends JPanel implements KeyListener, ActionListener {
     }
 
     private void drawHUD(Graphics2D g) {
-        drawPlayerBanner(g, 10, 10, "P1 — WASD+TFGH/RYVB", new Color(60, 120, 255), player1.isAlive());
-        drawPlayerBanner(g, GameWindow.WIDTH - 310, 10, "P2 — ARROWS+IJKL/UOMN", new Color(255, 70, 70), player2.isAlive());
+        drawPlayerBanner(g, 10, 10, "P1 — WASD + SPACE", new Color(60, 120, 255), player1.isAlive());
+        drawPlayerBanner(g, GameWindow.WIDTH - 310, 10, "P2 — ARROWS + NUMPAD", new Color(255, 70, 70),
+                player2.isAlive());
     }
 
     private void drawPlayerBanner(Graphics2D g, int x, int y, String label, Color col, boolean alive) {
@@ -238,7 +256,7 @@ public class GamePanel extends JPanel implements KeyListener, ActionListener {
         int secondsLeft = 3 - (countdownTick / 60);
         String text = secondsLeft > 0 ? String.valueOf(secondsLeft) : "FIGHT!";
         drawDropShadowText(g, text, GameWindow.WIDTH / 2, GameWindow.HEIGHT / 2 - 20,
-                           new Font("Monospaced", Font.BOLD, 96), Color.WHITE, 5);
+                new Font("Monospaced", Font.BOLD, 96), Color.WHITE, 5);
     }
 
     private void drawWinScreen(Graphics2D g) {
@@ -246,9 +264,9 @@ public class GamePanel extends JPanel implements KeyListener, ActionListener {
         g.fillRect(0, 0, GameWindow.WIDTH, GameWindow.HEIGHT);
         Color winCol = (winner == 1) ? new Color(80, 150, 255) : new Color(255, 80, 80);
         drawDropShadowText(g, winnerText, GameWindow.WIDTH / 2, GameWindow.HEIGHT / 2 - 40,
-                           new Font("Monospaced", Font.BOLD, 72), winCol, 6);
+                new Font("Monospaced", Font.BOLD, 72), winCol, 6);
         drawDropShadowText(g, "Press  R  to  Play  Again", GameWindow.WIDTH / 2, GameWindow.HEIGHT / 2 + 60,
-                           new Font("Monospaced", Font.PLAIN, 26), new Color(200, 200, 200), 3);
+                new Font("Monospaced", Font.PLAIN, 26), new Color(200, 200, 200), 3);
     }
 
     private void drawDropShadowText(Graphics2D g, String text, int cx, int cy, Font font, Color col, int shadowOffset) {
@@ -282,23 +300,38 @@ public class GamePanel extends JPanel implements KeyListener, ActionListener {
         player2.keyPressed(code);
     }
 
-    @Override public void keyReleased(KeyEvent e) {
+    @Override
+    public void keyReleased(KeyEvent e) {
         player1.keyReleased(e.getKeyCode());
         player2.keyReleased(e.getKeyCode());
     }
-    @Override public void keyTyped(KeyEvent e) {}
+
+    @Override
+    public void keyTyped(KeyEvent e) {
+    }
 
     private static class Particle {
         float x, y, vx, vy;
         int size, r, grn, b, alpha;
+
         Particle(float x, float y, float vx, float vy, int size, Color col) {
-            this.x = x; this.y = y; this.vx = vx; this.vy = vy;
+            this.x = x;
+            this.y = y;
+            this.vx = vx;
+            this.vy = vy;
             this.size = size;
-            this.r = col.getRed(); this.grn = col.getGreen(); this.b = col.getBlue();
+            this.r = col.getRed();
+            this.grn = col.getGreen();
+            this.b = col.getBlue();
             this.alpha = 255;
         }
+
         void update() {
-            x += vx; y += vy; vy += 0.25f; vx *= 0.95f; alpha -= 6;
+            x += vx;
+            y += vy;
+            vy += 0.25f;
+            vx *= 0.95f;
+            alpha -= 6;
         }
     }
 }

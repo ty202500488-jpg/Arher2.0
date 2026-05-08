@@ -10,7 +10,7 @@ import java.awt.geom.AffineTransform;
 public class Arrow {
 
     // ── constants ────────────────────────────────────────────────
-    public static final int   SIZE  = 18;   // bounding box for collision
+    public static final int   SIZE  = 27;   // bounding box for collision
     public static final float SPEED = 11f;  // pixels per tick
 
     // ── state ────────────────────────────────────────────────────
@@ -64,6 +64,7 @@ public class Arrow {
         // Translate/rotate to arrow position
         g2.translate((int) x, (int) y);
         g2.rotate(angle);
+        g2.scale(1.5, 1.5);
 
         drawPixelArrow(g2);
 
