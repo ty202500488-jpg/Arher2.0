@@ -19,15 +19,8 @@ public class GamePanel extends JPanel
     private int hazardTimer=0,powerUpTimer=0;
     private static final int PU_IV=600;
 
-    public static class Particle{
-        public float x,y,vx,vy;public int size,r,grn,b,alpha;
-        Particle(float x,float y,float vx,float vy,int sz,Color c){this.x=x;this.y=y;this.vx=vx;this.vy=vy;size=sz;r=c.getRed();grn=c.getGreen();b=c.getBlue();alpha=255;}
-        void update(){x+=vx;y+=vy;vy+=0.28f;vx*=0.93f;alpha-=5;}
-    }
-    static class PowerUp{ float x,y;int type;boolean active=true; PowerUp(float x,float y,int t){this.x=x;this.y=y;type=t;} }
-
-    public enum GameState{ LOADING,MAIN_MENU,MAP_SELECT,CONTROLS,PLAYING,SLOW_MO,OVER,PAUSED,SETTINGS }
     private GameState state=GameState.LOADING, prevState=GameState.PLAYING;
+
 
     // Loading
     private int loadTick=0; private static final int LOAD_DUR=150;

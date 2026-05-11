@@ -51,7 +51,7 @@ public class GameRenderer {
     static void bgPts(Graphics2D g,float[][]pts,int al){
         g.setColor(new Color(255,255,255,al));for(float[]p:pts)g.fillOval((int)p[0],(int)p[1],2,2);
     }
-    static void drawParticles(Graphics2D g,List<GamePanel.Particle>ps){
+    static void drawParticles(Graphics2D g,List<Particle>ps){
         for(var p:ps){int a=Math.max(0,Math.min(255,p.alpha));g.setColor(new Color(p.r,p.grn,p.b,a));g.fillRect((int)p.x,(int)p.y,p.size,p.size);}
     }
 
