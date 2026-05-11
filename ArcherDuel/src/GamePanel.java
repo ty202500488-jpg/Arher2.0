@@ -87,8 +87,20 @@ public class GamePanel extends JPanel
         Arrow.windX = wind ? (rng.nextFloat() - 0.5f) * 2.8f : 0f;
         Arrow.windY = 0;
         arena = new Arena(selMap);
-        p1 = new Player(0, 100, Arena.GROUND_Y - Player.H, sprites);
-        p2 = new Player(1, GameWindow.WIDTH - 100 - Player.W, Arena.GROUND_Y - Player.H, sprites);
+
+        // Sky Islands has no ground — spawn players ON the center start platform
+        if (selMap == MapTheme.SKY_ISLANDS) {
+            // Center island: { W/2-160, GY-60, 320, 22 } → top at GY-60
+            int islandTop = ArenaData.GY - 60;
+            int islandLeft = ArenaData.W / 2 - 160;
+            float spawnY = islandTop - Player.H;
+            p1 = new Player(0, islandLeft + 20, spawnY, sprites);
+            p2 = new Player(1, islandLeft + 320 - Player.W - 20, spawnY, sprites);
+        } else {
+            p1 = new Player(0, 100, Arena.GROUND_Y - Player.H, sprites);
+            p2 = new Player(1, GameWindow.WIDTH - 100 - Player.W, Arena.GROUND_Y - Player.H, sprites);
+        }
+
         p1.setIceMode(selMap.hasIce);
         p1.setSpeedMult(selMap.speedMultiplier);
         p2.setIceMode(selMap.hasIce);

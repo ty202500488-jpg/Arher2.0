@@ -3,7 +3,11 @@ import java.util.List;
 
 public class GameRenderer {
     static final int W = GameWindow.WIDTH, H = GameWindow.HEIGHT;
-    static final Color GOLD = new Color(200, 160, 40), DARK = new Color(12, 10, 22), STONE = new Color(50, 45, 65);
+    static final Color GOLD  = new Color(230, 185, 55),
+                        AMBER = new Color(255, 195, 70),
+                        DARK  = new Color(20, 16, 38),
+                        STONE = new Color(55, 50, 72),
+                        TITLE_COL = new Color(255, 210, 85);
     static final Font F72 = new Font("Monospaced", Font.BOLD, 72), F36 = new Font("Monospaced", Font.BOLD, 36),
             F20 = new Font("Monospaced", Font.BOLD, 20), F14 = new Font("Monospaced", Font.PLAIN, 14),
             F11 = new Font("Monospaced", Font.PLAIN, 11);
@@ -84,10 +88,26 @@ public class GameRenderer {
         g.setFont(f);
         FontMetrics m = g.getFontMetrics();
         int x = cx - m.stringWidth(s) / 2;
-        g.setColor(new Color(0, 0, 0, 120));
-        g.drawString(s, x + 3, y + 3);
+        g.setColor(new Color(0, 0, 0, 140));
+        g.drawString(s, x + 2, y + 2);
         g.setColor(c);
         g.drawString(s, x, y);
+    }
+
+    /** Spaced title: draws each char with extra kerning for large display fonts. */
+    static void txtSpaced(Graphics2D g, String s, int cx, int y, Font f, Color c, int kern) {
+        g.setFont(f);
+        FontMetrics m = g.getFontMetrics();
+        int totalW = m.stringWidth(s) + kern * (s.length() - 1);
+        int x = cx - totalW / 2;
+        for (int i = 0; i < s.length(); i++) {
+            String ch = String.valueOf(s.charAt(i));
+            g.setColor(new Color(0, 0, 0, 140));
+            g.drawString(ch, x + 2, y + 2);
+            g.setColor(c);
+            g.drawString(ch, x, y);
+            x += m.stringWidth(ch) + kern;
+        }
     }
 
     static void panel(Graphics2D g, int x, int y, int w, int h) {
@@ -98,17 +118,19 @@ public class GameRenderer {
     }
 
     static void drawBtn(Graphics2D g, Rectangle r, String s, boolean sel, boolean hover) {
-        Color bg = hover ? new Color(50, 40, 75) : sel ? new Color(40, 32, 60) : new Color(25, 20, 40);
-        Color border = hover || sel ? GOLD : new Color(80, 70, 100);
-        Color fc = hover || sel ? Color.WHITE : new Color(180, 160, 120);
+        Color bg     = hover ? new Color(70, 52, 18) : sel ? new Color(55, 42, 14) : new Color(32, 26, 10);
+        Color border = hover || sel ? AMBER : new Color(120, 95, 40);
+        Color fc     = hover || sel ? new Color(255, 235, 160) : new Color(200, 175, 110);
         if (hover || sel) {
-            g.setColor(new Color(200, 160, 40, 60));
+            g.setColor(new Color(230, 185, 55, 70));
             g.fillRoundRect(r.x - 3, r.y - 3, r.width + 6, r.height + 6, 12, 12);
         }
         g.setColor(bg);
         g.fillRoundRect(r.x, r.y, r.width, r.height, 10, 10);
         g.setColor(border);
+        g.setStroke(new BasicStroke(hover || sel ? 2f : 1.2f));
         g.drawRoundRect(r.x, r.y, r.width, r.height, 10, 10);
+        g.setStroke(new BasicStroke(1));
         g.setFont(hover || sel ? F20 : new Font("Monospaced", Font.BOLD, 16));
         FontMetrics fm = g.getFontMetrics();
         g.setColor(fc);
@@ -121,9 +143,16 @@ public class GameRenderer {
     }
 
     static void bgPts(Graphics2D g, float[][] pts, int al) {
-        g.setColor(new Color(255, 255, 255, al));
-        for (float[] p : pts)
-            g.fillOval((int) p[0], (int) p[1], 2, 2);
+        for (float[] p : pts) {
+            // warm star tint: alternate between white-gold and pale blue
+            int idx = (int)(p[0] + p[1]) % 3;
+            Color sc = idx == 0 ? new Color(255, 230, 160, al)
+                                : idx == 1 ? new Color(255, 255, 255, al)
+                                           : new Color(200, 220, 255, al);
+            g.setColor(sc);
+            int sz = (int)(p[0] * 31 + p[1]) % 3 == 0 ? 3 : 2;
+            g.fillOval((int) p[0], (int) p[1], sz, sz);
+        }
     }
 
     static void drawParticles(Graphics2D g, List<Particle> ps) {
@@ -136,41 +165,76 @@ public class GameRenderer {
 
     // ── LOADING ───────────────────────────────────────────────────
     static void drawLoading(Graphics2D g, int tick, int max, float[][] pts, int mx, int my) {
-        bg(g, DARK, new Color(20, 14, 35));
-        bgPts(g, pts, 20);
-        // Archer silhouettes
+        // Brighter, warmer background
+        bg(g, new Color(28, 20, 50), new Color(55, 30, 15));
+        bgPts(g, pts, 60);
         long t = System.currentTimeMillis();
-        drawArcher(g, 180, (int) (H / 2 + 80 + Math.sin(t / 700.0) * 8), true, new Color(60, 120, 255, 90));
-        drawArcher(g, W - 220, (int) (H / 2 + 80 + Math.sin(t / 700.0 + 1) * 8), false, new Color(255, 60, 60, 90));
-        txt(g, "ARCHER DUEL", W / 2, H / 2 - 70, F72, Color.CYAN);
-        // Bar
-        int bx = W / 2 - 220, by = H / 2 + 20, bw = 440, bh = 16;
-        g.setColor(new Color(30, 25, 50));
-        g.fillRoundRect(bx, by, bw, bh, 8, 8);
-        g.setColor(new Color(100, 80, 30, 80));
-        g.drawRoundRect(bx, by, bw, bh, 8, 8);
+
+        // ── Layout anchors ──
+        int centerX = W / 2;
+        int titleY   = H / 2 - 110;   // main title baseline
+        int subY     = titleY + 36;    // subtitle just below title
+        int divY     = subY  + 22;     // thin separator line
+        int barY     = divY  + 28;     // progress bar top
+        int barW     = 460;
+        int barH     = 18;
+        int barX     = centerX - barW / 2;
+        int loadLblY = barY + barH + 26; // "Loading..." label
+        int tipY     = H - 48;
+        int skipY    = H - 22;
+
+        // Ambient glow behind title
+        float glow = (float)(Math.sin(t / 600.0) * 0.5 + 0.5);
+        g.setColor(new Color(200, 140, 40, (int)(20 + glow * 40)));
+        g.fillOval(centerX - 260, titleY - 80, 520, 140);
+
+        // ── Title ──
+        txtSpaced(g, "ARCHER DUEL", centerX, titleY, F72, TITLE_COL, 6);
+
+        // ── Subtitle ──
+        txt(g, "Medieval  1v1  Arena", centerX, subY, F14, new Color(210, 175, 100));
+
+        // ── Thin gold divider ──
+        g.setColor(new Color(200, 155, 50, 120));
+        g.fillRect(centerX - 160, divY, 320, 1);
+
+        // ── Progress bar ──
+        g.setColor(new Color(40, 30, 12));
+        g.fillRoundRect(barX, barY, barW, barH, 9, 9);
+        g.setColor(new Color(150, 110, 40, 120));
+        g.drawRoundRect(barX, barY, barW, barH, 9, 9);
         float r = Math.min(1f, (float) tick / max);
-        g.setPaint(new GradientPaint(bx, 0, new Color(60, 100, 255), bx + bw, 0, Color.CYAN));
-        g.fillRoundRect(bx, by, (int) (bw * r), bh, 8, 8);
+        g.setPaint(new GradientPaint(barX, 0, new Color(160, 90, 20), barX + barW, 0, AMBER));
+        g.fillRoundRect(barX, barY, (int)(barW * r), barH, 9, 9);
         g.setPaint(null);
-        // Arrow tip
-        int tip = bx + (int) (bw * r);
-        g.setColor(new Color(255, 255, 200));
-        g.fillPolygon(new int[] { tip, tip + 12, tip }, new int[] { by, by + bh / 2, by + bh }, 3);
-        txt(g, "Loading...", W / 2, H / 2 + 55, F14, new Color(160, 160, 160));
+        // Sheen
+        g.setColor(new Color(255, 240, 180, 55));
+        g.fillRoundRect(barX, barY, (int)(barW * r), barH / 2, 9, 9);
+        // Arrow-tip at leading edge
+        int tip = barX + (int)(barW * r);
+        g.setColor(new Color(255, 245, 160));
+        g.fillPolygon(new int[]{tip, tip + 14, tip}, new int[]{barY, barY + barH / 2, barY + barH}, 3);
+
+        // ── "Loading..." label ──
+        txt(g, "Loading...", centerX, loadLblY, F14, new Color(210, 185, 130));
+
+        // ── Tip ──
         String[] tips = { "Headshots deal double damage!", "Hold F or RCTRL to charge shot",
                 "Dash makes you invincible briefly", "Sky Islands: fall off = instant death",
                 "Watch wind direction before shooting" };
-        txt(g, "Tip: " + tips[(tick / 30) % tips.length], W / 2, H - 45, F11, new Color(120, 120, 120));
-        txt(g, "Press any key or click to skip", W / 2, H - 22, F11, new Color(70, 70, 70));
+        txt(g, "Tip:  " + tips[(tick / 30) % tips.length], centerX, tipY, F11, new Color(185, 160, 100));
+
+        // ── Skip hint ──
+        txt(g, "Press any key or click to skip", centerX, skipY, F11, new Color(130, 110, 75));
     }
 
     // ── MAIN MENU ─────────────────────────────────────────────────
     static void drawMainMenu(Graphics2D g, int cur, float pulse, float[][] pts, int mx, int my) {
-        bg(g, new Color(8, 18, 12), new Color(18, 36, 20));
-        bgPts(g, pts, 16);
-        // Trees
-        g.setColor(new Color(8, 16, 10));
+        bg(g, new Color(10, 20, 14), new Color(22, 40, 22));
+        bgPts(g, pts, 50);
+
+        // ── Trees (decorative background) ──
+        g.setColor(new Color(10, 22, 12));
         int[] tx = { 0, 110, 240, 380, 530, 670, 810, 960, 1110, 1270 };
         int[] tw = { 80, 65, 75, 60, 85, 70, 75, 60, 80, 75 };
         for (int i = 0; i < tx.length; i++) {
@@ -179,23 +243,46 @@ public class GameRenderer {
             g.fillOval(tx[i], H - h2 - 40, tw[i] + 50, h2 / 2 + 40);
             g.fillOval(tx[i] + 8, H - h2 - 90, tw[i] + 35, h2 / 2 + 50);
         }
-        // Fog
-        g.setPaint(new GradientPaint(0, H - 120, new Color(15, 30, 15, 0), 0, H, new Color(8, 18, 12, 200)));
+        // Fog at bottom
+        g.setPaint(new GradientPaint(0, H - 120, new Color(18, 35, 18, 0), 0, H, new Color(10, 22, 14, 210)));
         g.fillRect(0, H - 120, W, 120);
         g.setPaint(null);
-        // Archers
+
+        // ── Layout anchors ──
+        int centerX  = W / 2;
+        int titleY   = H / 2 - 155;   // main title baseline
+        int subY     = titleY + 36;    // subtitle
+        int divY     = subY   + 20;    // thin gold divider
+        // buttons: menuBtn(i) uses H/2 - 20 + i*58, keep that formula but shift
+        // we just need title block to not overlap the buttons
+        // buttons start at ~H/2 - 20, title ends at divY ~ H/2 - 99 → plenty of gap
+
+        // ── Ambient glow behind title ──
         long t = System.currentTimeMillis();
-        drawArcher(g, 150, (int) (H - 240 + Math.sin(t / 900.0) * 7), true, new Color(80, 140, 255, 130));
-        drawArcher(g, W - 190, (int) (H - 240 + Math.sin(t / 900.0 + 1.3) * 7), false, new Color(255, 80, 80, 130));
-        txt(g, "ARCHER  DUEL", W / 2, H / 2 - 160, F72, Color.CYAN);
-        txt(g, "Medieval 1v1 Arena", W / 2, H / 2 - 110, F11, new Color(120, 180, 120));
+        float glow = (float)(Math.sin(t / 700.0) * 0.5 + 0.5);
+        g.setColor(new Color(180, 130, 30, (int)(15 + glow * 30)));
+        g.fillOval(centerX - 280, titleY - 80, 560, 140);
+
+        // ── Title ──
+        txtSpaced(g, "ARCHER  DUEL", centerX, titleY, F72, TITLE_COL, 6);
+
+        // ── Subtitle ──
+        txt(g, "Medieval  1v1  Arena", centerX, subY, F14, new Color(175, 215, 140));
+
+        // ── Thin gold divider ──
+        g.setColor(new Color(200, 155, 50, 100));
+        g.fillRect(centerX - 140, divY, 280, 1);
+
+        // ── Menu buttons (PLAY / CONTROLS / SETTINGS / EXIT) ──
         String[] items = { "PLAY", "CONTROLS", "SETTINGS", "EXIT" };
         for (int i = 0; i < items.length; i++) {
             Rectangle r = menuBtn(i);
             boolean hov = r.contains(mx, my);
             drawBtn(g, r, items[i], i == cur, hov);
         }
-        txt(g, "↑↓ Navigate     ENTER / Click = Select", W / 2, H - 22, F11, new Color(80, 80, 80));
+
+        // ── Hint at very bottom ──
+        txt(g, "↑↓  Navigate     ENTER / Click = Select", centerX, H - 22, F11, new Color(120, 110, 80));
     }
 
     // ── MAP SELECT ────────────────────────────────────────────────
@@ -204,7 +291,7 @@ public class GameRenderer {
         MapTheme m = maps[cur];
         Color bgc = mapCol(m);
         bg(g, bgc.darker().darker(), bgc.darker());
-        txt(g, "SELECT  MAP", W / 2, 55, F36, Color.CYAN);
+        txt(g, "SELECT  MAP", W / 2, 55, F36, TITLE_COL);
         // Card
         int cx = W / 2, py = 80, pw = 640, ph = 370;
         panel(g, cx - pw / 2, py, pw, ph);
@@ -242,22 +329,22 @@ public class GameRenderer {
         }
         // Start btn
         Rectangle sb = btn(cx, py + ph + 75, 220, 44);
-        drawBtn(g, sb, "START  [ENTER]", true, sb.contains(mx, my));
-        txt(g, "◄ ► Change Map    ESC = Back", cx, H - 22, F11, new Color(80, 80, 80));
+        drawBtn(g, sb, "START  MATCH", true, sb.contains(mx, my));
+        txt(g, "◄ ►  Change Map     ESC = Back", cx, H - 22, F11, new Color(120, 110, 80));
     }
 
     // ── CONTROLS ──────────────────────────────────────────────────
     static void drawControls(Graphics2D g, float pulse, int mx, int my) {
         bg(g, DARK, new Color(18, 14, 32));
-        txt(g, "CONTROLS", W / 2, 58, F36, Color.CYAN);
+        txt(g, "CONTROLS", W / 2, 58, F36, TITLE_COL);
         int col1 = W / 2 - 290, col2 = W / 2 + 30, cw = 260, py = 80;
         panel(g, col1 - 10, py, cw + 20, 240);
         panel(g, col2 - 10, py, cw + 20, 240);
         g.setColor(new Color(80, 140, 255));
         g.setFont(F20);
-        g.drawString("PLAYER  1", col1, py + 28);
+        g.drawString("PLAYER 1", col1, py + 28);
         g.setColor(new Color(255, 80, 80));
-        g.drawString("PLAYER  2", col2, py + 28);
+        g.drawString("PLAYER 2", col2, py + 28);
         g.setFont(F14);
         g.setColor(new Color(180, 180, 180));
         String[] p1c = { "A / D  —  Move", "W / SPACE  —  Jump", "F  —  Shoot  (Hold=Charge)", "LEFT SHIFT  —  Dash" };
@@ -277,13 +364,13 @@ public class GameRenderer {
             Rectangle r = ctrlBtn(i);
             drawBtn(g, r, bl[i], i == 1, r.contains(mx, my));
         }
-        txt(g, "ESC = Back    ENTER = Start Match", W / 2, H - 22, F11, new Color(80, 80, 80));
+        txt(g, "ESC = Back    ENTER = Start Match", W / 2, H - 22, F11, new Color(130, 115, 80));
     }
 
     // ── SETTINGS ──────────────────────────────────────────────────
     static void drawSettings(Graphics2D g, boolean bgm, boolean sfx, float pulse, int mx, int my) {
         bg(g, DARK, new Color(18, 14, 32));
-        txt(g, "SETTINGS", W / 2, 58, F36, Color.CYAN);
+        txt(g, "SETTINGS", W / 2, 58, F36, TITLE_COL);
         String[] sl = { "MUSIC: " + (bgm ? "ON" : "OFF"), "SFX: " + (sfx ? "ON" : "OFF"), "BACK" };
         Color[] sc = { bgm ? new Color(80, 200, 80) : new Color(180, 80, 80),
                 sfx ? new Color(80, 200, 80) : new Color(180, 80, 80), new Color(160, 140, 100) };
@@ -292,7 +379,7 @@ public class GameRenderer {
             boolean hov = r.contains(mx, my);
             drawBtn(g, r, sl[i], false, hov);
         }
-        txt(g, "Click or ENTER to toggle    ESC = Back", W / 2, H - 22, F11, new Color(80, 80, 80));
+        txt(g, "Click or ENTER to toggle    ESC = Back", W / 2, H - 22, F11, new Color(130, 115, 80));
     }
 
     // ── HUD ───────────────────────────────────────────────────────
@@ -381,36 +468,39 @@ public class GameRenderer {
     // ── RESULTS ───────────────────────────────────────────────────
     static void drawResults(Graphics2D g, int win, String wt, int r1, int r2, int rw, int f1, int h1, int s1, int f2,
             int h2, int s2, int cur, int mx, int my) {
-        g.setColor(new Color(0, 0, 0, 185));
+        // Dark overlay
+        g.setColor(new Color(0, 0, 0, 200));
         g.fillRect(0, 0, W, H);
-        Color wc = win == 1 ? new Color(80, 150, 255) : new Color(255, 80, 80);
-        txt(g, wt, W / 2, H / 2 - 150, F72, wc);
-        txt(g, "P1 " + r1 + " — " + r2 + " P2", W / 2, H / 2 - 95, F36, Color.WHITE);
-        // Stats
-        panel(g, W / 2 - 340, H / 2 - 70, 680, 140);
-        txt(g, "MATCH STATS", W / 2, H / 2 - 44, F14, GOLD);
-        g.setFont(F14);
-        String[] lb = { "Arrows Fired", "Arrows Hit", "Accuracy", "Headshots" };
-        int[] v1 = { f1, h1, f1 > 0 ? (int) (h1 * 100f / f1) : 0, s1 };
-        int[] v2 = { f2, h2, f2 > 0 ? (int) (h2 * 100f / f2) : 0, s2 };
-        for (int i = 0; i < lb.length; i++) {
-            int sy = H / 2 - 20 + i * 26;
-            g.setColor(new Color(80, 140, 255));
-            String sv1 = i == 2 ? v1[i] + "%" : String.valueOf(v1[i]);
-            g.drawString(sv1, W / 2 - 280, sy);
-            g.setColor(new Color(160, 160, 160));
-            FontMetrics fm = g.getFontMetrics();
-            g.drawString(lb[i], W / 2 - fm.stringWidth(lb[i]) / 2, sy);
-            g.setColor(new Color(255, 80, 80));
-            String sv2 = i == 2 ? v2[i] + "%" : String.valueOf(v2[i]);
-            g.drawString(sv2, W / 2 + 240, sy);
-        }
+
+        // Layout anchors
+        int cx  = W / 2;
+        int winY   = H / 2 - 140;  // winner text
+        int scoreY = winY + 52;    // score line
+        int divY   = scoreY + 20;  // thin divider
+        int btn0Y  = divY + 40;    // first button
+        int hintY  = H - 22;
+
+        // Winner colour
+        Color wc = win == 1 ? new Color(100, 170, 255) : new Color(255, 90, 90);
+
+        // Winner text (large, spaced)
+        txtSpaced(g, wt.toUpperCase(), cx, winY, F72, wc, 4);
+
+        // Score  "P1  2 — 1  P2"
+        txt(g, "P1   " + r1 + "  —  " + r2 + "   P2", cx, scoreY, F36, Color.WHITE);
+
+        // Thin divider
+        g.setColor(new Color(wc.getRed(), wc.getGreen(), wc.getBlue(), 120));
+        g.fillRect(cx - 180, divY, 360, 1);
+
+        // Three action buttons
         String[] rl = { "REMATCH", "MAP SELECT", "MAIN MENU" };
         for (int i = 0; i < 3; i++) {
             Rectangle r = resultBtn(i);
             drawBtn(g, r, rl[i], i == cur, r.contains(mx, my));
         }
-        txt(g, "↑↓ Navigate    ENTER = Select    ESC = Main Menu", W / 2, H - 22, F11, new Color(80, 80, 80));
+
+        txt(g, "↑↓  Navigate     ENTER = Select     ESC = Main Menu", cx, hintY, F11, new Color(120, 110, 80));
     }
 
     // ── MAP HELPERS ───────────────────────────────────────────────
