@@ -6,25 +6,32 @@ import java.util.Random;
 /**
  * MapHazard — environmental hazards.
  * Each hazard type corresponds to specific maps:
- *   FIREBALL  → Volcano
- *   LAVA_POOL → Volcano
- *   ICE_PATCH → Ice Cavern
- *   SPIKE     → future Trap Dungeon
+ * FIREBALL → Volcano
+ * LAVA_POOL → Volcano
+ * ICE_PATCH → Ice Cavern
+ * SPIKE → future Trap Dungeon
  */
 public class MapHazard {
 
-    public enum Type { FIREBALL, LAVA_POOL, ICE_PATCH, FALLING_ROCK }
+    public enum Type {
+        FIREBALL, LAVA_POOL, ICE_PATCH, FALLING_ROCK
+    }
 
-    public float   x, y, vx, vy;
-    public int     w, h;
-    public Type    type;
+    public float x, y, vx, vy;
+    public int w, h;
+    public Type type;
     public boolean active = true;
-    public int     lifetime = 0;    // ticks alive
+    public int lifetime = 0; // ticks alive
     private final Random rng = new Random();
 
     public MapHazard(float x, float y, float vx, float vy, int w, int h, Type type) {
-        this.x = x; this.y = y; this.vx = vx; this.vy = vy;
-        this.w = w; this.h = h; this.type = type;
+        this.x = x;
+        this.y = y;
+        this.vx = vx;
+        this.vy = vy;
+        this.w = w;
+        this.h = h;
+        this.type = type;
     }
 
     public void update() {
@@ -41,8 +48,10 @@ public class MapHazard {
         if ((type == Type.FIREBALL || type == Type.FALLING_ROCK)
                 && y >= Arena.GROUND_Y - h) {
             y = Arena.GROUND_Y - h;
-            vx *= 0.4f; vy = 0;
-            if (lifetime > 20) active = false;
+            vx *= 0.4f;
+            vy = 0;
+            if (lifetime > 20)
+                active = false;
         }
     }
 
@@ -61,40 +70,40 @@ public class MapHazard {
     }
 
     private void drawFireball(Graphics2D g, long t) {
-        float p = (float)(Math.sin(t / 80.0) * 0.5 + 0.5);
+        float p = (float) (Math.sin(t / 80.0) * 0.5 + 0.5);
         // Outer glow
         g.setColor(new Color(255, 120, 0, 80));
-        g.fillOval((int)x - 6, (int)y - 6, w + 12, h + 12);
+        g.fillOval((int) x - 6, (int) y - 6, w + 12, h + 12);
         // Core
-        g.setColor(new Color(255, 80 + (int)(p*80), 0));
-        g.fillOval((int)x, (int)y, w, h);
+        g.setColor(new Color(255, 80 + (int) (p * 80), 0));
+        g.fillOval((int) x, (int) y, w, h);
         // Inner hot
         g.setColor(new Color(255, 255, 100, 180));
-        g.fillOval((int)x + 4, (int)y + 4, w - 8, h - 8);
+        g.fillOval((int) x + 4, (int) y + 4, w - 8, h - 8);
     }
 
     private void drawLavaPool(Graphics2D g, long t) {
-        float p = (float)(Math.sin(t / 400.0 + x * 0.01) * 0.3 + 0.7);
-        g.setColor(new Color(200, 50, 0, (int)(p * 200)));
-        g.fillRect((int)x, (int)y, w, h);
-        g.setColor(new Color(255, 160, 0, (int)(p * 160)));
-        g.fillRect((int)x + 4, (int)y + 2, w - 8, h/3);
+        float p = (float) (Math.sin(t / 400.0 + x * 0.01) * 0.3 + 0.7);
+        g.setColor(new Color(200, 50, 0, (int) (p * 200)));
+        g.fillRect((int) x, (int) y, w, h);
+        g.setColor(new Color(255, 160, 0, (int) (p * 160)));
+        g.fillRect((int) x + 4, (int) y + 2, w - 8, h / 3);
     }
 
     private void drawIcePatch(Graphics2D g) {
         g.setColor(new Color(180, 230, 255, 140));
-        g.fillRoundRect((int)x, (int)y, w, h, 8, 8);
+        g.fillRoundRect((int) x, (int) y, w, h, 8, 8);
         g.setColor(new Color(220, 245, 255, 200));
-        g.drawRoundRect((int)x, (int)y, w, h, 8, 8);
+        g.drawRoundRect((int) x, (int) y, w, h, 8, 8);
         // Shine
         g.setColor(new Color(255, 255, 255, 100));
-        g.fillOval((int)x + 6, (int)y + 3, w/3, h/3);
+        g.fillOval((int) x + 6, (int) y + 3, w / 3, h / 3);
     }
 
     private void drawRock(Graphics2D g, long t) {
         g.setColor(new Color(90, 80, 70));
-        int[] rx = {(int)x, (int)x+w/2, (int)x+w, (int)x+w*3/4, (int)x+w/4};
-        int[] ry = {(int)y+h, (int)y, (int)y+h/2, (int)y+h, (int)y+h};
+        int[] rx = { (int) x, (int) x + w / 2, (int) x + w, (int) x + w * 3 / 4, (int) x + w / 4 };
+        int[] ry = { (int) y + h, (int) y, (int) y + h / 2, (int) y + h, (int) y + h };
         g.fillPolygon(rx, ry, 5);
         g.setColor(new Color(120, 110, 100));
         g.drawPolygon(rx, ry, 5);
@@ -112,7 +121,7 @@ public class MapHazard {
     /** Spawn a falling rock. */
     public static MapHazard spawnRock(Random rng) {
         float sx = 100 + rng.nextFloat() * (GameWindow.WIDTH - 200);
-        return new MapHazard(sx, -20, (rng.nextFloat()-0.5f)*1.5f, 1.5f, 30, 20, Type.FALLING_ROCK);
+        return new MapHazard(sx, -20, (rng.nextFloat() - 0.5f) * 1.5f, 1.5f, 30, 20, Type.FALLING_ROCK);
     }
 
     /** Create a static lava pool at given position. */
