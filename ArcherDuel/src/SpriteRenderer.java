@@ -12,36 +12,36 @@ public class SpriteRenderer {
     public static final int FRAME_H = 72;
 
     // Animation row indices
-    public static final int ANIM_IDLE  = 0;
-    public static final int ANIM_WALK  = 1;
+    public static final int ANIM_IDLE = 0;
+    public static final int ANIM_WALK = 1;
     public static final int ANIM_SHOOT = 2;
     public static final int ANIM_DEATH = 3;
-    public static final int ANIM_DASH  = 4;
+    public static final int ANIM_DASH = 4;
 
     // Frame counts per animation row
-    public static final int[] FRAME_COUNTS = {4, 6, 6, 6, 4};
+    public static final int[] FRAME_COUNTS = { 4, 6, 6, 6, 4 };
 
     private static final Color[][] PALETTES = {
-        // Player 1 — Frost Archer (Blue/Cyan/Silver)
-        {
-            new Color(30, 40, 90),       // 0: Armor Main
-            new Color(100, 200, 255),    // 1: Highlight
-            new Color(240, 210, 180),    // 2: Skin
-            new Color(180, 240, 255),    // 3: Bow
-            new Color(255, 255, 255),    // 4: String/Glow
-            new Color(0, 150, 255),      // 5: Cape
-            new Color(80, 120, 255, 120) // 6: Particle Aura
-        },
-        // Player 2 — Ember Archer (Red/Gold/Charcoal)
-        {
-            new Color(60, 20, 20),       // 0: Armor Main
-            new Color(255, 180, 50),     // 1: Highlight
-            new Color(230, 190, 160),    // 2: Skin
-            new Color(150, 40, 20),      // 3: Bow
-            new Color(255, 255, 100),    // 4: String/Glow
-            new Color(200, 50, 30),      // 5: Cape
-            new Color(255, 100, 0, 130)  // 6: Particle Aura
-        }
+            // Player 1 — Frost Archer (Blue/Cyan/Silver)
+            {
+                    new Color(30, 40, 90), // 0: Armor Main
+                    new Color(100, 200, 255), // 1: Highlight
+                    new Color(240, 210, 180), // 2: Skin
+                    new Color(180, 240, 255), // 3: Bow
+                    new Color(255, 255, 255), // 4: String/Glow
+                    new Color(0, 150, 255), // 5: Cape
+                    new Color(80, 120, 255, 120) // 6: Particle Aura
+            },
+            // Player 2 — Ember Archer (Red/Gold/Charcoal)
+            {
+                    new Color(60, 20, 20), // 0: Armor Main
+                    new Color(255, 180, 50), // 1: Highlight
+                    new Color(230, 190, 160), // 2: Skin
+                    new Color(150, 40, 20), // 3: Bow
+                    new Color(255, 255, 100), // 4: String/Glow
+                    new Color(200, 50, 30), // 5: Cape
+                    new Color(255, 100, 0, 130) // 6: Particle Aura
+            }
     };
 
     private final BufferedImage[] sheets = new BufferedImage[2];
@@ -61,9 +61,10 @@ public class SpriteRenderer {
     }
 
     private BufferedImage buildSheet(int player) {
-        int numRows   = FRAME_COUNTS.length; // 5 rows now
+        int numRows = FRAME_COUNTS.length; // 5 rows now
         int maxFrames = 0;
-        for (int c : FRAME_COUNTS) maxFrames = Math.max(maxFrames, c);
+        for (int c : FRAME_COUNTS)
+            maxFrames = Math.max(maxFrames, c);
 
         BufferedImage sheet = new BufferedImage(
                 maxFrames * FRAME_W, numRows * FRAME_H, BufferedImage.TYPE_INT_ARGB);
@@ -81,11 +82,11 @@ public class SpriteRenderer {
                 fg.scale(1.5, 1.5);
 
                 switch (row) {
-                    case ANIM_IDLE  -> drawIdle(fg, 0, 0, f, pal);
-                    case ANIM_WALK  -> drawWalk(fg, 0, 0, f, pal);
+                    case ANIM_IDLE -> drawIdle(fg, 0, 0, f, pal);
+                    case ANIM_WALK -> drawWalk(fg, 0, 0, f, pal);
                     case ANIM_SHOOT -> drawShoot(fg, 0, 0, f, pal);
                     case ANIM_DEATH -> drawDeath(fg, 0, 0, f, pal);
-                    case ANIM_DASH  -> drawDash(fg, 0, 0, f, pal);
+                    case ANIM_DASH -> drawDash(fg, 0, 0, f, pal);
                 }
                 fg.dispose();
             }
@@ -141,9 +142,9 @@ public class SpriteRenderer {
     // ── CORE ARCHER DRAWING ────────────────────────────────────
 
     private void drawArcher(Graphics2D g, int ox, int oy, Color[] pal,
-                             int walkF, boolean isWalk, int shootF, boolean isDash) {
+            int walkF, boolean isWalk, int shootF, boolean isDash) {
         Color main = pal[0], light = pal[1], skin = pal[2],
-              bow  = pal[3], string = pal[4], cape = pal[5];
+                bow = pal[3], string = pal[4], cape = pal[5];
         int bx = 14, by = 12;
 
         int legX = 0, legY = 0;
@@ -157,9 +158,9 @@ public class SpriteRenderer {
         drawRect(g, ox + bx - 2, oy + by + 6, capeW, 12, cape, null);
 
         // Body
-        drawRect(g, ox + bx,     oy + by + 6,  10, 12, main,  Color.BLACK);
-        drawRect(g, ox + bx + 2, oy + by + 7,  6,  4,  light, null);
-        drawRect(g, ox + bx,     oy + by + 16, 10, 3,  Color.BLACK, null);
+        drawRect(g, ox + bx, oy + by + 6, 10, 12, main, Color.BLACK);
+        drawRect(g, ox + bx + 2, oy + by + 7, 6, 4, light, null);
+        drawRect(g, ox + bx, oy + by + 16, 10, 3, Color.BLACK, null);
 
         // Legs
         drawRect(g, ox + bx + 1 + legX, oy + by + 18 + legY, 4, 6, main, Color.BLACK);
@@ -167,7 +168,7 @@ public class SpriteRenderer {
 
         // Head / Helmet
         drawRect(g, ox + bx - 1, oy + by - 6, 12, 12, main, Color.BLACK);
-        drawRect(g, ox + bx + 1, oy + by - 2,  8,  6, skin, null);
+        drawRect(g, ox + bx + 1, oy + by - 2, 8, 6, skin, null);
         g.setColor(Color.BLACK);
         g.fillRect(ox + bx + 6, oy + by + 1, 2, 2);
 
@@ -180,9 +181,9 @@ public class SpriteRenderer {
         // String
         g.setColor(string);
         g.drawLine(ox + bx + 15 - drawBack, oy + by - 2,
-                   ox + bx + 10 - drawBack * 2, oy + by + 10);
+                ox + bx + 10 - drawBack * 2, oy + by + 10);
         g.drawLine(ox + bx + 10 - drawBack * 2, oy + by + 10,
-                   ox + bx + 15 - drawBack, oy + by + 22);
+                ox + bx + 15 - drawBack, oy + by + 22);
 
         // Arrow on string when shooting
         if (shootF > 0 && shootF < 4) {
@@ -201,8 +202,8 @@ public class SpriteRenderer {
 
     private void drawGlow(Graphics2D g, int ox, int oy, int frame, Color color) {
         for (int i = 0; i < 5; i++) {
-            int px   = rand.nextInt(20) + 14;
-            int py   = rand.nextInt(20) + 14;
+            int px = rand.nextInt(20) + 14;
+            int py = rand.nextInt(20) + 14;
             int size = rand.nextInt(4) + 2;
             g.setColor(color);
             g.fillOval(ox + px, oy + py - (frame * 2 % 10), size, size);
@@ -210,8 +211,14 @@ public class SpriteRenderer {
     }
 
     private void drawRect(Graphics2D g, int x, int y, int w, int h, Color fill, Color border) {
-        if (fill   != null) { g.setColor(fill);   g.fillRect(x, y, w, h); }
-        if (border != null) { g.setColor(border); g.drawRect(x, y, w, h); }
+        if (fill != null) {
+            g.setColor(fill);
+            g.fillRect(x, y, w, h);
+        }
+        if (border != null) {
+            g.setColor(border);
+            g.drawRect(x, y, w, h);
+        }
     }
 
     private BufferedImage flipH(BufferedImage src) {
