@@ -36,6 +36,7 @@ public class Player {
 
     // External fire/dash injection (for RIGHT_CTRL, RIGHT_SHIFT)
     private boolean extFirePressed = false, extDashPressed = false;
+    private ArrowPool arrowPool;
 
     private final boolean[] keys = new boolean[65536];
     private final int KEY_L, KEY_R, KEY_UP, KEY_DOWN, KEY_DASH, KEY_FIRE;
@@ -44,15 +45,20 @@ public class Player {
     private int downPressTimer = 0;
     private int dropThroughTimer = 0;
 
+    private final Rectangle bounds = new Rectangle();
+    private final Rectangle headshotBounds = new Rectangle();
+    private final Rectangle footBox = new Rectangle();
+
     private final AnimationController anim = new AnimationController();
     private final SpriteRenderer sprites;
     public final List<Arrow> arrows = new ArrayList<>();
 
-    public Player(int idx, float sx, float sy, SpriteRenderer sp) {
+    public Player(int idx, float sx, float sy, SpriteRenderer sp, ArrowPool ap) {
         playerIndex = idx;
         x = sx;
         y = sy;
         sprites = sp;
+        arrowPool = ap;
         facingRight = (idx == 0);
         if (idx == 0) {
             KEY_L = KeyEvent.VK_A;
@@ -134,14 +140,13 @@ public class Player {
         if (downPressTimer > 0) downPressTimer--;
         if (dropThroughTimer > 0) dropThroughTimer--;
 
-        // Gravity
         vy = Math.min(vy + GRAV, MAX_FALL);
         y += vy;
         onGround = false;
+        footBox.setBounds((int) x, (int) y + H - 4, W, 8);
         for (Rectangle r : plats) {
             if (dropThroughTimer > 0 && r.height < 50) continue;
-            Rectangle f = new Rectangle((int) x, (int) y + H - 4, W, 8);
-            if (f.intersects(r) && vy >= 0) {
+            if (footBox.intersects(r) && vy >= 0) {
                 y = r.y - H;
                 vy = 0;
                 onGround = true;
@@ -230,10 +235,10 @@ public class Player {
         vy = Math.min(vy + GRAV, MAX_FALL);
         y += vy;
         onGround = false;
+        footBox.setBounds((int) x, (int) y + H - 4, W, 8);
         for (Rectangle r : plats) {
             if (dropThroughTimer > 0 && r.height < 50) continue;
-            Rectangle f = new Rectangle((int) x, (int) y + H - 4, W, 8);
-            if (f.intersects(r) && vy >= 0) {
+            if (footBox.intersects(r) && vy >= 0) {
                 y = r.y - H;
                 vy = 0;
                 onGround = true;
@@ -259,16 +264,22 @@ public class Player {
     }
 
     private void releaseShot() {
-        if (!charging && chargeTicks == 0)
-            return;
-        float ch = Math.max(0.3f, (float) chargeTicks / MAX_CHARGE);
-        arrows.add(new Arrow(x + W / 2f, y + H / 2f, facingRight ? 1 : -1, 0, playerIndex, ch));
-        AudioManager.play(AudioManager.Sound.SHOOT);
-        shootCD = SHOOT_CD;
-        shootAnim = 18;
+        if (!alive) return;
+        float ch = Math.min(1.0f, chargeTicks / (float)MAX_CHARGE);
+        float s = Arrow.BASE_SPEED + (Arrow.MAX_SPEED - Arrow.BASE_SPEED) * ch;
+        float dx = facingRight ? s : -s;
+        float dy = -1.5f - (ch * 2f);
+        
+        // Obtain from pool
+        Arrow a = arrowPool.obtain(x + W/2, y + H/3, dx, dy, playerIndex, ch);
+        arrows.add(a);
+        
         charging = false;
         chargeTicks = 0;
+        shootCD = SHOOT_CD;
+        shootAnim = 15;
         arrowsFired++;
+        AudioManager.play(AudioManager.Sound.SHOOT);
     }
 
     private void updateAnim() {
@@ -311,7 +322,14 @@ public class Player {
     }
 
     public Rectangle getBounds() {
-        return new Rectangle((int) x, (int) y, W, H);
+        bounds.setBounds((int) x, (int) y, W, H);
+        return bounds;
+    }
+
+    public Rectangle getHeadshotBounds() {
+        int hbH = H / 3;
+        headshotBounds.setBounds((int) x, (int) y, W, hbH);
+        return headshotBounds;
     }
 
     public boolean isAlive() {

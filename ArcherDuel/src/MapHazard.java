@@ -23,6 +23,16 @@ public class MapHazard {
     public boolean active = true;
     public int lifetime = 0; // ticks alive
     private final Random rng = new Random();
+    private final Rectangle bounds = new Rectangle();
+
+    // ── Static Color constants (avoid per-frame allocation) ────────
+    private static final Color FIRE_GLOW = new Color(255, 120, 0, 80);
+    private static final Color FIRE_HOT  = new Color(255, 255, 100, 180);
+    private static final Color ICE_FILL  = new Color(180, 230, 255, 140);
+    private static final Color ICE_BRD   = new Color(220, 245, 255, 200);
+    private static final Color ICE_SHN   = new Color(255, 255, 255, 100);
+    private static final Color ROCK_FILL = new Color(90, 80, 70);
+    private static final Color ROCK_BRD  = new Color(120, 110, 100);
 
     public MapHazard(float x, float y, float vx, float vy, int w, int h, Type type) {
         this.x = x;
@@ -56,7 +66,8 @@ public class MapHazard {
     }
 
     public Rectangle getBounds() {
-        return new Rectangle((int) x, (int) y, w, h);
+        bounds.setBounds((int) x, (int) y, w, h);
+        return bounds;
     }
 
     public void draw(Graphics2D g) {
@@ -72,13 +83,13 @@ public class MapHazard {
     private void drawFireball(Graphics2D g, long t) {
         float p = (float) (Math.sin(t / 80.0) * 0.5 + 0.5);
         // Outer glow
-        g.setColor(new Color(255, 120, 0, 80));
+        g.setColor(FIRE_GLOW);
         g.fillOval((int) x - 6, (int) y - 6, w + 12, h + 12);
         // Core
         g.setColor(new Color(255, 80 + (int) (p * 80), 0));
         g.fillOval((int) x, (int) y, w, h);
         // Inner hot
-        g.setColor(new Color(255, 255, 100, 180));
+        g.setColor(FIRE_HOT);
         g.fillOval((int) x + 4, (int) y + 4, w - 8, h - 8);
     }
 
@@ -91,21 +102,21 @@ public class MapHazard {
     }
 
     private void drawIcePatch(Graphics2D g) {
-        g.setColor(new Color(180, 230, 255, 140));
+        g.setColor(ICE_FILL);
         g.fillRoundRect((int) x, (int) y, w, h, 8, 8);
-        g.setColor(new Color(220, 245, 255, 200));
+        g.setColor(ICE_BRD);
         g.drawRoundRect((int) x, (int) y, w, h, 8, 8);
         // Shine
-        g.setColor(new Color(255, 255, 255, 100));
+        g.setColor(ICE_SHN);
         g.fillOval((int) x + 6, (int) y + 3, w / 3, h / 3);
     }
 
     private void drawRock(Graphics2D g, long t) {
-        g.setColor(new Color(90, 80, 70));
+        g.setColor(ROCK_FILL);
         int[] rx = { (int) x, (int) x + w / 2, (int) x + w, (int) x + w * 3 / 4, (int) x + w / 4 };
         int[] ry = { (int) y + h, (int) y, (int) y + h / 2, (int) y + h, (int) y + h };
         g.fillPolygon(rx, ry, 5);
-        g.setColor(new Color(120, 110, 100));
+        g.setColor(ROCK_BRD);
         g.drawPolygon(rx, ry, 5);
     }
 

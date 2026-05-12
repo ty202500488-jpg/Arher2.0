@@ -19,6 +19,111 @@ public class Arena {
     // Ambient particle data (fireflies / snowflakes / embers / stars)
     private final int[][] pts = new int[60][3];
 
+    // ── Cached Color constants (avoid per-frame allocation ~60x/sec) ─────
+    // FOREST
+    private static final Color FC_BG1      = new Color(10, 24, 14);
+    private static final Color FC_BG2      = new Color(20, 44, 24);
+    private static final Color FC_TREE_FAR = new Color(8, 16, 10, 170);
+    private static final Color FC_TREE_D   = new Color(10, 22, 13);
+    private static final Color FC_TREE_M   = new Color(14, 32, 16);
+    private static final Color FC_FOG0     = new Color(12, 28, 14, 0);
+    private static final Color FC_FOG1     = new Color(8, 20, 10, 200);
+    private static final Color FC_PLAT_S   = new Color(58, 53, 46);
+    private static final Color FC_PLAT_M   = new Color(38, 115, 32);
+    private static final Color FC_AMB_G    = new Color(160, 255, 80, 45);
+    private static final Color FC_AMB_C    = new Color(200, 255, 120, 210);
+    // CASTLE
+    private static final Color CC_BG1      = new Color(15, 12, 28);
+    private static final Color CC_BG2      = new Color(38, 32, 58);
+    private static final Color CC_STAR     = new Color(255, 255, 255, 160);
+    private static final Color CC_MOON1    = new Color(232, 232, 202);
+    private static final Color CC_MOON2    = new Color(15, 12, 28);
+    private static final Color CC_MOON_G   = new Color(255, 255, 200, 14);
+    private static final Color CC_SIL      = new Color(18, 14, 33);
+    private static final Color CC_MIST0    = new Color(28, 18, 48, 0);
+    private static final Color CC_MIST1    = new Color(18, 12, 38, 180);
+    private static final Color CC_PLAT_S   = new Color(75, 70, 90);
+    private static final Color CC_PLAT_M   = new Color(50, 45, 70);
+    private static final Color CC_AMB_G    = new Color(180, 160, 255, 32);
+    private static final Color CC_AMB_C    = new Color(200, 190, 255, 185);
+    private static final Color CC_STONE    = new Color(42, 38, 62);
+    private static final Color CC_STONELT  = new Color(55, 50, 78);
+    private static final Color CC_CREN     = new Color(38, 34, 56);
+    private static final Color CC_WIN1     = new Color(255, 190, 60, 80);
+    private static final Color CC_WIN2     = new Color(255, 190, 60, 50);
+    private static final Color CC_GATE_BG  = new Color(8, 6, 16);
+    private static final Color CC_GATE_G   = new Color(255, 160, 40, 22);
+    private static final Color CC_SEAM     = new Color(30, 26, 46, 120);
+    // VOLCANO
+    private static final Color VC_BG1      = new Color(38, 8, 4);
+    private static final Color VC_BG2      = new Color(85, 20, 5);
+    private static final Color VC_GLOW     = new Color(255, 65, 0, 22);
+    private static final Color VC_MTN1     = new Color(48, 10, 5);
+    private static final Color VC_MTN2     = new Color(58, 14, 7);
+    private static final Color VC_LAVA0    = new Color(255, 85, 0, 210);
+    private static final Color VC_LAVA1    = new Color(185, 28, 0, 130);
+    private static final Color VC_HAZ      = new Color(255, 50, 0, 40);
+    private static final Color VC_PLAT_S   = new Color(92, 46, 36);
+    private static final Color VC_PLAT_M   = new Color(162, 72, 26);
+    private static final Color VC_AMB_G    = new Color(255, 140, 0, 42);
+    private static final Color VC_AMB_C    = new Color(255, 200, 50, 205);
+    // ICE
+    private static final Color IC_BG1      = new Color(145, 198, 228);
+    private static final Color IC_BG2      = new Color(58, 108, 158);
+    private static final Color IC_SNOW     = new Color(255, 255, 255, 65);
+    private static final Color IC_STLCT    = new Color(185, 225, 255, 190);
+    private static final Color IC_TINT     = new Color(175, 215, 245, 28);
+    private static final Color IC_SHIM0    = new Color(205, 238, 255, 0);
+    private static final Color IC_SHIM1    = new Color(225, 248, 255, 130);
+    private static final Color IC_PLAT_S   = new Color(158, 212, 242);
+    private static final Color IC_PLAT_M   = new Color(202, 237, 255);
+    private static final Color IC_TOP      = new Color(255, 255, 255, 60);
+    private static final Color IC_AMB_G    = new Color(200, 230, 255, 32);
+    private static final Color IC_AMB_C    = new Color(240, 250, 255, 205);
+    // SKY
+    private static final Color SK_BG1      = new Color(90, 130, 220);
+    private static final Color SK_BG2      = new Color(230, 170, 120);
+    private static final Color SK_CLOUD    = new Color(255, 255, 255, 190);
+    private static final Color SK_DIRT_MV  = new Color(160, 100, 50);
+    private static final Color SK_DIRT_ST  = new Color(120, 80, 45);
+    private static final Color SK_GRASS_MV = new Color(100, 200, 60);
+    private static final Color SK_GRASS_ST = new Color(60, 160, 50);
+    private static final Color SK_SHADOW   = new Color(0, 0, 0, 40);
+    private static final Color SK_DEATH0   = new Color(0, 0, 0, 0);
+    private static final Color SK_DEATH1   = new Color(0, 0, 0, 140);
+    private static final Color SK_AMB_G    = new Color(255, 240, 180, 30);
+    private static final Color SK_AMB_C    = new Color(255, 255, 220, 200);
+    private static final Font  SK_FONT     = new java.awt.Font("Monospaced", java.awt.Font.BOLD, 14);
+    // NIGHT
+    private static final Color NC_BG1      = new Color(4, 4, 16);
+    private static final Color NC_BG2      = new Color(10, 10, 26);
+    private static final Color NC_STAR     = new Color(255, 255, 255, 200);
+    private static final Color NC_MOON1    = new Color(242, 242, 212);
+    private static final Color NC_MOON2    = new Color(4, 4, 16);
+    private static final Color NC_MOON_G   = new Color(255, 255, 200, 12);
+    private static final Color NC_RUIN     = new Color(10, 10, 22);
+    private static final Color NC_MIST0    = new Color(18, 18, 42, 0);
+    private static final Color NC_MIST1    = new Color(12, 12, 32, 200);
+    private static final Color NC_PLAT_S   = new Color(28, 28, 48);
+    private static final Color NC_PLAT_M   = new Color(38, 58, 34);
+    private static final Color NC_AMB_G    = new Color(255, 200, 80, 32);
+    private static final Color NC_AMB_C    = new Color(255, 230, 120, 205);
+    // Shared / decorations
+    private static final Color BAR_BODY    = new Color(120, 70, 30);
+    private static final Color BAR_RIM     = new Color(160, 100, 50);
+    private static final Color BAR_BAND    = new Color(80, 80, 80);
+    private static final Color PLT_HILITE  = new Color(255, 255, 255, 90);
+    private static final Color PLT_SHADOW  = new Color(0, 0, 0, 50);
+    private static final Color VINE_GRN    = new Color(22, 70, 22);
+    private static final Color VINE_LEAF   = new Color(30, 90, 25, 160);
+    private static final Color BAN_POLE    = new Color(100, 90, 120);
+    private static final Color BAN_P1      = new Color(200, 60, 60);
+    private static final Color BAN_P2      = new Color(60, 100, 200);
+    private static final BasicStroke STROKE2 = new BasicStroke(2, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
+    private static final BasicStroke STROKE3 = new BasicStroke(3);
+    private static final BasicStroke STROKE1 = new BasicStroke(1);
+
+
     public Arena(MapTheme theme) {
         data = new ArenaData(theme);
         for (int[] p : pts) {
@@ -73,39 +178,39 @@ public class Arena {
 
     // ── FOREST ────────────────────────────────────────────────────
     private void drawForest(Graphics2D g) {
-        grad(g, new Color(10, 24, 14), new Color(20, 44, 24));
+        grad(g, FC_BG1, FC_BG2);
         // Far tree layer
-        g.setColor(new Color(8, 16, 10, 170));
+        g.setColor(FC_TREE_FAR);
         for (int x = 0; x < W(); x += 90) { int h2 = 420 + (x % 120); g.fillOval(x - 20, GROUND_Y - h2, 130, h2); }
         // Mid tree layer
-        drawTrees(g, new Color(10, 22, 13), new Color(14, 32, 16));
+        drawTrees(g, FC_TREE_D, FC_TREE_M);
         // God rays
         drawRays(g);
         // Ground fog
-        g.setPaint(new GradientPaint(0, GROUND_Y - 55, new Color(12, 28, 14, 0), 0, GROUND_Y, new Color(8, 20, 10, 200)));
+        g.setPaint(new GradientPaint(0, GROUND_Y - 55, FC_FOG0, 0, GROUND_Y, FC_FOG1));
         g.fillRect(0, GROUND_Y - 55, W(), 55); g.setPaint(null);
         // Platforms
-        drawAllPlatforms(g, new Color(58, 53, 46), new Color(38, 115, 32), true);
+        drawAllPlatforms(g, FC_PLAT_S, FC_PLAT_M, true);
         // Barrels
         drawBarrel(g, 420, GROUND_Y); drawBarrel(g, 960, GROUND_Y);
         drawBarrel(g, W()/2 - 50, GROUND_Y); drawBarrel(g, W()/2 + 30, GROUND_Y);
         // Fireflies
-        drawAmb(g, new Color(160, 255, 80, 45), new Color(200, 255, 120, 210));
+        drawAmb(g, FC_AMB_G, FC_AMB_C);
     }
 
     // ── CASTLE ────────────────────────────────────────────────────
     private void drawCastle(Graphics2D g) {
-        grad(g, new Color(15, 12, 28), new Color(38, 32, 58));
+        grad(g, CC_BG1, CC_BG2);
         // Stars
         long ts = System.currentTimeMillis();
-        g.setColor(new Color(255, 255, 255, 160));
+        g.setColor(CC_STAR);
         for (int[] p : pts) { float tw = (float)(Math.sin(ts/800.0+p[2])*0.5+0.5); if (tw>0.3f) g.fillOval(p[0], p[1]%260, 2, 2); }
         // Moon
-        g.setColor(new Color(232, 232, 202)); g.fillOval(W()-165, 22, 92, 92);
-        g.setColor(new Color(15, 12, 28));    g.fillOval(W()-135, 12, 92, 92);
-        g.setColor(new Color(255, 255, 200, 14)); g.fillOval(W()-190, 5, 132, 132);
+        g.setColor(CC_MOON1); g.fillOval(W()-165, 22, 92, 92);
+        g.setColor(CC_MOON2);    g.fillOval(W()-135, 12, 92, 92);
+        g.setColor(CC_MOON_G); g.fillOval(W()-190, 5, 132, 132);
         // Far castle silhouettes
-        g.setColor(new Color(18, 14, 33));
+        g.setColor(CC_SIL);
         for (int[] t : new int[][]{{0,195,80},{280,158,100},{580,138,92},{880,165,100},{1080,148,80},{1280,188,90}}) {
             g.fillRect(t[0], t[1], t[2], HEIGHT-t[1]);
             for (int bx=t[0]; bx<t[0]+t[2]; bx+=20) g.fillRect(bx, t[1]-15, 12, 18);
@@ -113,75 +218,75 @@ public class Arena {
         // Castle BG drawing
         drawCastleBG(g);
         // Purple mist
-        g.setPaint(new GradientPaint(0, GROUND_Y-70, new Color(28,18,48,0), 0, GROUND_Y, new Color(18,12,38,180)));
+        g.setPaint(new GradientPaint(0, GROUND_Y-70, CC_MIST0, 0, GROUND_Y, CC_MIST1));
         g.fillRect(0, GROUND_Y-70, W(), 70); g.setPaint(null);
-        drawAllPlatforms(g, new Color(75, 70, 90), new Color(50, 45, 70), false);
-        drawAmb(g, new Color(180, 160, 255, 32), new Color(200, 190, 255, 185));
+        drawAllPlatforms(g, CC_PLAT_S, CC_PLAT_M, false);
+        drawAmb(g, CC_AMB_G, CC_AMB_C);
     }
 
     // ── VOLCANO ───────────────────────────────────────────────────
     private void drawVolcano(Graphics2D g) {
-        grad(g, new Color(38, 8, 4), new Color(85, 20, 5));
+        grad(g, VC_BG1, VC_BG2);
         // Fire sky glow
-        g.setColor(new Color(255, 65, 0, 22)); g.fillRect(0, 0, W(), HEIGHT/2);
+        g.setColor(VC_GLOW); g.fillRect(0, 0, W(), HEIGHT/2);
         // Mountain silhouettes
-        g.setColor(new Color(48, 10, 5));
+        g.setColor(VC_MTN1);
         int[] vx={0,320,480,600,710,860,W(),W(),0}, vy={HEIGHT,245,HEIGHT-75,195,HEIGHT-55,235,HEIGHT,HEIGHT,HEIGHT};
         g.fillPolygon(vx, vy, 9);
-        g.setColor(new Color(58, 14, 7));
+        g.setColor(VC_MTN2);
         int[] vx2={0,200,380,W()/2,720,900,1100,W(),W(),0}, vy2={HEIGHT,270,HEIGHT-60,210,HEIGHT-50,250,HEIGHT-45,HEIGHT,HEIGHT,HEIGHT};
         g.fillPolygon(vx2, vy2, 10);
         // Lava ground
-        g.setPaint(new GradientPaint(0, GROUND_Y, new Color(255,85,0,210), 0, HEIGHT, new Color(185,28,0,130)));
+        g.setPaint(new GradientPaint(0, GROUND_Y, VC_LAVA0, 0, HEIGHT, VC_LAVA1));
         g.fillRect(0, GROUND_Y, W(), HEIGHT-GROUND_Y); g.setPaint(null);
         // Lava surface shimmer
         long tl=System.currentTimeMillis(); float lp=(float)(Math.sin(tl/400.0)*0.5+0.5);
         g.setColor(new Color(255,180,0,(int)(lp*80))); g.fillRect(0, GROUND_Y, W(), 6);
         // Hazard floor markings
-        g.setColor(new Color(255,50,0,40));
+        g.setColor(VC_HAZ);
         g.fillRect(195, GROUND_Y-12, 165, 12);
         g.fillRect(615, GROUND_Y-12, 205, 12);
         g.fillRect(1015, GROUND_Y-12, 165, 12);
-        drawAllPlatforms(g, new Color(92, 46, 36), new Color(162, 72, 26), false);
-        drawAmb(g, new Color(255, 140, 0, 42), new Color(255, 200, 50, 205));
+        drawAllPlatforms(g, VC_PLAT_S, VC_PLAT_M, false);
+        drawAmb(g, VC_AMB_G, VC_AMB_C);
     }
 
     // ── ICE ───────────────────────────────────────────────────────
     private void drawIce(Graphics2D g) {
-        grad(g, new Color(145, 198, 228), new Color(58, 108, 158));
+        grad(g, IC_BG1, IC_BG2);
         // Snowfall
         long t = System.currentTimeMillis();
-        g.setColor(new Color(255, 255, 255, 65));
+        g.setColor(IC_SNOW);
         for (int[] p : pts) {
             int px = (int)(p[0] + Math.sin(t/900.0+p[2])*18) % W();
             int py = (int)((p[1] + (t/18 + p[2]*4)) % GROUND_Y);
             if (py > 0) { int sz=1+(p[2]%3); g.fillOval(px, py, sz+1, sz+1); }
         }
         // Ice stalactites
-        g.setColor(new Color(185, 225, 255, 190));
+        g.setColor(IC_STLCT);
         for (int x = 35; x < W(); x += 62) {
             int ih = 22 + (x%5)*15;
             g.fillPolygon(new int[]{x,x+12,x+24}, new int[]{0,ih,0}, 3);
         }
         // Ice wall tint
-        g.setColor(new Color(175, 215, 245, 28)); g.fillRect(0, 0, W(), HEIGHT);
+        g.setColor(IC_TINT); g.fillRect(0, 0, W(), HEIGHT);
         // Floor shimmer
-        g.setPaint(new GradientPaint(0, GROUND_Y-28, new Color(205,238,255,0), 0, GROUND_Y, new Color(225,248,255,130)));
+        g.setPaint(new GradientPaint(0, GROUND_Y-28, IC_SHIM0, 0, GROUND_Y, IC_SHIM1));
         g.fillRect(0, GROUND_Y-28, W(), 28); g.setPaint(null);
-        drawAllPlatforms(g, new Color(158, 212, 242), new Color(202, 237, 255), false);
+        drawAllPlatforms(g, IC_PLAT_S, IC_PLAT_M, false);
         // Ice shimmer strips on platform tops
-        g.setColor(new Color(255, 255, 255, 60));
+        g.setColor(IC_TOP);
         for (Rectangle r : data.platforms) g.fillRect(r.x+2, r.y, r.width-4, 3);
-        drawAmb(g, new Color(200, 230, 255, 32), new Color(240, 250, 255, 205));
+        drawAmb(g, IC_AMB_G, IC_AMB_C);
     }
 
     // ── SKY ISLANDS ───────────────────────────────────────────────
     private void drawSky(Graphics2D g) {
         // Dawn gradient
-        grad(g, new Color(90, 130, 220), new Color(230, 170, 120));
+        grad(g, SK_BG1, SK_BG2);
         // Clouds (drifting)
         long t = System.currentTimeMillis();
-        g.setColor(new Color(255, 255, 255, 190));
+        g.setColor(SK_CLOUD);
         int[] cxs = { 60, 300, 580, 850, 1110, 1320 };
         int[] cys = { 70, 150, 55, 130, 80, 155 };
         for (int i = 0; i < cxs.length; i++) {
@@ -193,11 +298,11 @@ public class Arena {
             Rectangle r = data.platforms[i];
             boolean moving = data.isMovingPlatform(i);
             // Dirt body
-            Color dirt = moving ? new Color(160, 100, 50) : new Color(120, 80, 45);
+            Color dirt = moving ? SK_DIRT_MV : SK_DIRT_ST;
             g.setColor(dirt);
             g.fillRoundRect(r.x, r.y + 5, r.width, 22, 10, 10);
             // Grass
-            Color grass = moving ? new Color(100, 200, 60) : new Color(60, 160, 50);
+            Color grass = moving ? SK_GRASS_MV : SK_GRASS_ST;
             g.setColor(grass);
             g.fillRoundRect(r.x, r.y, r.width, 12, 10, 10);
             // Tufts
@@ -205,88 +310,85 @@ public class Arena {
             for (int gx = r.x + 6; gx < r.x + r.width - 4; gx += 9)
                 g.drawLine(gx, r.y, gx, r.y - 4);
             // Shadow under
-            g.setColor(new Color(0, 0, 0, 40));
+            g.setColor(SK_SHADOW);
             g.fillOval(r.x + 8, r.y + 28, r.width - 16, 10);
             // Moving indicator: pulsing arrow
             if (moving) {
                 long tt = System.currentTimeMillis();
                 float p = (float) (Math.sin(tt / 300.0) * 0.5 + 0.5);
                 g.setColor(new Color(255, 255, 100, (int) (p * 180)));
-                g.setFont(new java.awt.Font("Monospaced", java.awt.Font.BOLD, 14));
+                g.setFont(SK_FONT);
                 g.drawString("◄ ►", r.x + r.width / 2 - 14, r.y - 5);
             }
         }
         // Death zone indicator
-        g.setPaint(new GradientPaint(0, HEIGHT - 50, new Color(0, 0, 0, 0), 0, HEIGHT, new Color(0, 0, 0, 140)));
+        g.setPaint(new GradientPaint(0, HEIGHT - 50, SK_DEATH0, 0, HEIGHT, SK_DEATH1));
         g.fillRect(0, HEIGHT - 50, W(), 50);
-        drawAmb(g, new Color(255, 240, 180, 30), new Color(255, 255, 220, 200));
+        drawAmb(g, SK_AMB_G, SK_AMB_C);
         return;
     }
 
     // ── NIGHT ─────────────────────────────────────────────────────
     private void drawNight(Graphics2D g) {
-        grad(g, new Color(4, 4, 16), new Color(10, 10, 26));
+        grad(g, NC_BG1, NC_BG2);
         // Stars
         long t = System.currentTimeMillis();
-        g.setColor(new Color(255, 255, 255, 200));
+        g.setColor(NC_STAR);
         for (int[] p : pts) { float tw=(float)(Math.sin(t/800.0+p[2])*0.5+0.5); if (tw>0.35f) g.fillOval(p[0], p[1]%280, 2, 2); }
         // Crescent moon
-        g.setColor(new Color(242, 242, 212)); g.fillOval(W()-140, 25, 80, 80);
-        g.setColor(new Color(4, 4, 16));       g.fillOval(W()-115, 15, 80, 80);
-        g.setColor(new Color(255,255,200,12));  g.fillOval(W()-162,5,122,122);
+        g.setColor(NC_MOON1); g.fillOval(W()-140, 25, 80, 80);
+        g.setColor(NC_MOON2);       g.fillOval(W()-115, 15, 80, 80);
+        g.setColor(NC_MOON_G);  g.fillOval(W()-162,5,122,122);
         // Distant ruins silhouette
-        g.setColor(new Color(10, 10, 22));
+        g.setColor(NC_RUIN);
         for (int[] b : new int[][]{{50,350,60},{200,320,40},{500,340,70},{750,310,55},{1000,345,65},{1200,330,50}}) {
             g.fillRect(b[0], b[1], b[2], HEIGHT-b[1]);
             for (int wx=b[0]; wx<b[0]+b[2]; wx+=14) g.fillRect(wx, b[1]-10, 8, 12);
         }
         // Ground mist
-        g.setPaint(new GradientPaint(0, GROUND_Y-38, new Color(18,18,42,0), 0, GROUND_Y, new Color(12,12,32,200)));
+        g.setPaint(new GradientPaint(0, GROUND_Y-38, NC_MIST0, 0, GROUND_Y, NC_MIST1));
         g.fillRect(0, GROUND_Y-38, W(), 38); g.setPaint(null);
-        drawAllPlatforms(g, new Color(28, 28, 48), new Color(38, 58, 34), false);
+        drawAllPlatforms(g, NC_PLAT_S, NC_PLAT_M, false);
         drawTorches(g);
-        drawAmb(g, new Color(255, 200, 80, 32), new Color(255, 230, 120, 205));
+        drawAmb(g, NC_AMB_G, NC_AMB_C);
     }
 
     // ── CASTLE BACKGROUND ────────────────────────────────────────────
     private void drawCastleBG(Graphics2D g) {
         int cx = W() / 2, baseY = GROUND_Y;
-        Color stone  = new Color(42, 38, 62);
-        Color stoneLt= new Color(55, 50, 78);
-        Color cren   = new Color(38, 34, 56);
         // ── Left tower (x=cx-340..cx-220) ──
         int lx = cx - 340, tw = 120, th = 480;
-        g.setColor(stone); g.fillRect(lx, baseY-th, tw, th);
-        g.setColor(stoneLt); g.fillRect(lx, baseY-th, tw, 6); // top highlight
-        for (int bx=lx; bx<lx+tw; bx+=20) { g.setColor(cren); g.fillRect(bx, baseY-th-20, 14, 22); } // battlements
+        g.setColor(CC_STONE); g.fillRect(lx, baseY-th, tw, th);
+        g.setColor(CC_STONELT); g.fillRect(lx, baseY-th, tw, 6); // top highlight
+        for (int bx=lx; bx<lx+tw; bx+=20) { g.setColor(CC_CREN); g.fillRect(bx, baseY-th-20, 14, 22); } // battlements
         // Windows L tower
-        g.setColor(new Color(255, 190, 60, 80)); g.fillRect(lx+30, baseY-th+60, 20, 30);
-        g.setColor(new Color(255, 190, 60, 80)); g.fillRect(lx+70, baseY-th+60, 20, 30);
-        g.setColor(new Color(255, 190, 60, 50)); g.fillRect(lx+30, baseY-th+160, 20, 30);
-        g.setColor(new Color(255, 190, 60, 50)); g.fillRect(lx+70, baseY-th+160, 20, 30);
+        g.setColor(CC_WIN1); g.fillRect(lx+30, baseY-th+60, 20, 30);
+        g.setColor(CC_WIN1); g.fillRect(lx+70, baseY-th+60, 20, 30);
+        g.setColor(CC_WIN2); g.fillRect(lx+30, baseY-th+160, 20, 30);
+        g.setColor(CC_WIN2); g.fillRect(lx+70, baseY-th+160, 20, 30);
         // ── Right tower (x=cx+220..cx+340) ──
         int rx = cx + 220;
-        g.setColor(stone); g.fillRect(rx, baseY-th, tw, th);
-        g.setColor(stoneLt); g.fillRect(rx, baseY-th, tw, 6);
-        for (int bx=rx; bx<rx+tw; bx+=20) { g.setColor(cren); g.fillRect(bx, baseY-th-20, 14, 22); }
-        g.setColor(new Color(255, 190, 60, 80)); g.fillRect(rx+30, baseY-th+60, 20, 30);
-        g.setColor(new Color(255, 190, 60, 80)); g.fillRect(rx+70, baseY-th+60, 20, 30);
-        g.setColor(new Color(255, 190, 60, 50)); g.fillRect(rx+30, baseY-th+160, 20, 30);
-        g.setColor(new Color(255, 190, 60, 50)); g.fillRect(rx+70, baseY-th+160, 20, 30);
+        g.setColor(CC_STONE); g.fillRect(rx, baseY-th, tw, th);
+        g.setColor(CC_STONELT); g.fillRect(rx, baseY-th, tw, 6);
+        for (int bx=rx; bx<rx+tw; bx+=20) { g.setColor(CC_CREN); g.fillRect(bx, baseY-th-20, 14, 22); }
+        g.setColor(CC_WIN1); g.fillRect(rx+30, baseY-th+60, 20, 30);
+        g.setColor(CC_WIN1); g.fillRect(rx+70, baseY-th+60, 20, 30);
+        g.setColor(CC_WIN2); g.fillRect(rx+30, baseY-th+160, 20, 30);
+        g.setColor(CC_WIN2); g.fillRect(rx+70, baseY-th+160, 20, 30);
         // ── Centre wall ──
         int ww = rx - (lx + tw); // wall width between towers
         int wy = baseY - 340;
-        g.setColor(stone); g.fillRect(lx+tw, wy, ww, 340);
-        g.setColor(stoneLt); g.fillRect(lx+tw, wy, ww, 5);
-        for (int bx=lx+tw; bx<rx; bx+=20) { g.setColor(cren); g.fillRect(bx, wy-18, 14, 20); }
+        g.setColor(CC_STONE); g.fillRect(lx+tw, wy, ww, 340);
+        g.setColor(CC_STONELT); g.fillRect(lx+tw, wy, ww, 5);
+        for (int bx=lx+tw; bx<rx; bx+=20) { g.setColor(CC_CREN); g.fillRect(bx, wy-18, 14, 20); }
         // Arched gate
-        g.setColor(new Color(8, 6, 16));
+        g.setColor(CC_GATE_BG);
         g.fillRect(cx-28, wy+200, 56, 140);
         g.fillArc(cx-28, wy+175, 56, 50, 0, 180);
         // Gate glow
-        g.setColor(new Color(255, 160, 40, 22)); g.fillRect(cx-28, wy+200, 56, 140);
+        g.setColor(CC_GATE_G); g.fillRect(cx-28, wy+200, 56, 140);
         // Block seam lines on wall
-        g.setColor(new Color(30, 26, 46, 120));
+        g.setColor(CC_SEAM);
         for (int gy2=wy; gy2<baseY; gy2+=24) g.drawLine(lx+tw, gy2, rx, gy2);
         for (int bx2=lx+tw; bx2<rx; bx2+=36) g.drawLine(bx2, wy, bx2, baseY);
     }
@@ -328,26 +430,26 @@ public class Arena {
         g.setColor(m);
         g.fillRect(r.x, r.y, r.width, 7);
         // ── TOP EDGE HIGHLIGHT (readability) ──
-        g.setColor(new Color(255, 255, 255, 90));
+        g.setColor(PLT_HILITE);
         g.fillRect(r.x+1, r.y, r.width-2, 2);
         // Moss tufts
         g.setColor(m.brighter());
         for (int x = r.x+4; x < r.x+r.width-4; x += 7) g.drawLine(x, r.y, x, r.y-3-(x%3));
         // Underside shadow for depth
-        g.setColor(new Color(0, 0, 0, 50));
+        g.setColor(PLT_SHADOW);
         g.fillRect(r.x, r.y+r.height, r.width, 4);
         // Vines
         if (vines) {
-            g.setColor(new Color(22, 70, 22));
-            g.setStroke(new BasicStroke(2, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+            g.setColor(VINE_GRN);
+            g.setStroke(STROKE2);
             for (int vx = r.x+18; vx < r.x+r.width-10; vx += 28) {
                 int vl = 12 + (vx*7)%22;
                 g.drawLine(vx, r.y+r.height, vx, r.y+r.height+vl);
-                g.setColor(new Color(30, 90, 25, 160));
+                g.setColor(VINE_LEAF);
                 g.fillOval(vx-3, r.y+r.height+vl-2, 8, 5);
-                g.setColor(new Color(22, 70, 22));
+                g.setColor(VINE_GRN);
             }
-            g.setStroke(new BasicStroke(1));
+            g.setStroke(STROKE1);
         }
         // Moving platform highlight
         if (moving) {
@@ -360,19 +462,19 @@ public class Arena {
 
     // ── DECORATIONS ───────────────────────────────────────────────
     private void drawBarrel(Graphics2D g, int bx, int by) {
-        g.setColor(new Color(120, 70, 30));
+        g.setColor(BAR_BODY);
         g.fillRoundRect(bx, by - 28, 22, 28, 6, 6);
-        g.setColor(new Color(160, 100, 50));
+        g.setColor(BAR_RIM);
         g.drawRoundRect(bx, by - 28, 22, 28, 6, 6);
-        g.setColor(new Color(80, 80, 80));
+        g.setColor(BAR_BAND);
         g.fillRect(bx - 1, by - 24, 24, 4);
         g.fillRect(bx - 1, by - 10, 24, 4);
     }
 
     private void drawBanner(Graphics2D g, int bx, int by, int col) {
-        g.setColor(new Color(100, 90, 120));
+        g.setColor(BAN_POLE);
         g.fillRect(bx, by, 5, 60);
-        Color fc = col == 0 ? new Color(200, 60, 60) : new Color(60, 100, 200);
+        Color fc = col == 0 ? BAN_P1 : BAN_P2;
         g.setColor(fc);
         int[] px = { bx + 5, bx + 40, bx + 5 };
         int[] py = { by, by + 15, by + 30 };
@@ -484,10 +586,10 @@ public class Arena {
         g.fillRect(0, 0, so, HEIGHT);
         g.fillRect(W() - so, 0, so, HEIGHT);
         g.setColor(new Color(255, 100, 0, (int) (p * 220)));
-        g.setStroke(new BasicStroke(3));
+        g.setStroke(STROKE3);
         g.drawLine(so, 0, so, HEIGHT);
         g.drawLine(W() - so, 0, W() - so, HEIGHT);
-        g.setStroke(new BasicStroke(1));
+        g.setStroke(STROKE1);
     }
 
     private int W() {

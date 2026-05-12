@@ -1,6 +1,4 @@
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Arrow v2 — Physics-based projectile.
@@ -20,46 +18,56 @@ public class Arrow {
     public float x, y;
     public float dx, dy;
     public int ownerIndex;
-    public boolean active = true;
-    public boolean isHeadshot = false; // set when collision checked externally
+    public boolean active = false;
+    public boolean isHeadshot = false; 
 
-    // charge 0..1 affects speed
-    private final float charge;
+    private final Rectangle bounds = new Rectangle();
+    private float charge;
+    
+    public Arrow() {}
 
-    // Trail
-    private final List<float[]> trail = new ArrayList<>();
+    public void reset(float x, float y, float dx, float dy, int owner, float ch) {
+        this.x = x;
+        this.y = y;
+        this.dx = dx;
+        this.dy = dy;
+        this.ownerIndex = owner;
+        this.charge = ch;
+        this.active = true;
+        this.isHeadshot = false;
+        this.trailHead = 0;
+        this.trailSize = 0;
+    }
+
+    // Trail — circular buffer, avoids ArrayList prepend overhead
     private static final int TRAIL_LEN = 12;
+    private final float[] trailX = new float[TRAIL_LEN];
+    private final float[] trailY = new float[TRAIL_LEN];
+    private int trailHead = 0;  // index of newest entry
+    private int trailSize = 0;  // how many entries filled so far
+
+    // Pre-cached trail colors per owner (index 0=P1, 1=P2), keyed by alpha step
+    private static final Color[] TRAIL_P1 = new Color[TRAIL_LEN];
+    private static final Color[] TRAIL_P2 = new Color[TRAIL_LEN];
+    static {
+        for (int i = 0; i < TRAIL_LEN; i++) {
+            float a = 1f - (float) i / TRAIL_LEN;
+            TRAIL_P1[i] = new Color(80, 180, 255, (int)(a * 120));
+            TRAIL_P2[i] = new Color(255, 130, 40, (int)(a * 120));
+        }
+    }
 
     // Wind reference (set per-match from GamePanel)
     public static float windX = 0f;
     public static float windY = 0f;
 
-    // ── constructor ───────────────────────────────────────────────
-    public Arrow(float startX, float startY, float dirX, float dirY, int ownerIndex, float charge) {
-        this.x = startX;
-        this.y = startY;
-        this.ownerIndex = ownerIndex;
-        this.charge = Math.max(0.3f, Math.min(charge, 1f));
-
-        float speed = BASE_SPEED + (MAX_SPEED - BASE_SPEED) * this.charge;
-        float len = (float) Math.sqrt(dirX * dirX + dirY * dirY);
-        if (len == 0)
-            len = 1;
-        this.dx = (dirX / len) * speed;
-        this.dy = (dirY / len) * speed;
-    }
-
-    // Legacy constructor for compat
-    public Arrow(float startX, float startY, int dirX, int dirY, int ownerIndex) {
-        this(startX, startY, (float) dirX, (float) dirY, ownerIndex, 0.6f);
-    }
-
-    // ── update ────────────────────────────────────────────────────
+    // ── update ────────────────────────────────────────────
     public void update() {
-        // Store trail point
-        trail.add(0, new float[] { x, y });
-        if (trail.size() > TRAIL_LEN)
-            trail.remove(trail.size() - 1);
+        // Store trail point in circular buffer (newest at head)
+        trailHead = (trailHead == 0) ? TRAIL_LEN - 1 : trailHead - 1;
+        trailX[trailHead] = x;
+        trailY[trailHead] = y;
+        if (trailSize < TRAIL_LEN) trailSize++;
 
         // Gravity
         dy += GRAVITY;
@@ -80,7 +88,8 @@ public class Arrow {
 
     // ── collision rectangle ───────────────────────────────────────
     public Rectangle getBounds() {
-        return new Rectangle((int) x - SIZE / 2, (int) y - SIZE / 2, SIZE, SIZE);
+        bounds.setBounds((int) x - SIZE / 2, (int) y - SIZE / 2, SIZE, SIZE);
+        return bounds;
     }
 
     /** Headshot zone — upper portion of target bounds */
@@ -89,21 +98,19 @@ public class Arrow {
         return new Rectangle(playerBounds.x, playerBounds.y, playerBounds.width, headH);
     }
 
-    // ── rendering ─────────────────────────────────────────────────
+    // ── rendering ────────────────────────────────────────────
     public void draw(Graphics2D g) {
         if (!active)
             return;
 
-        // Draw trail
-        for (int i = 0; i < trail.size(); i++) {
-            float[] pt = trail.get(i);
+        // Draw trail from circular buffer
+        Color[] trailColors = (ownerIndex == 0) ? TRAIL_P1 : TRAIL_P2;
+        for (int i = 0; i < trailSize; i++) {
+            int idx = (trailHead + i) % TRAIL_LEN;
             float alpha = 1f - (float) i / TRAIL_LEN;
-            Color tc = (ownerIndex == 0)
-                    ? new Color(80, 180, 255, (int) (alpha * 120))
-                    : new Color(255, 130, 40, (int) (alpha * 120));
             int sz = Math.max(2, (int) (6 * alpha));
-            g.setColor(tc);
-            g.fillOval((int) pt[0] - sz / 2, (int) pt[1] - sz / 2, sz, sz);
+            g.setColor(trailColors[i]);
+            g.fillOval((int) trailX[idx] - sz / 2, (int) trailY[idx] - sz / 2, sz, sz);
         }
 
         // Draw arrow rotated along velocity

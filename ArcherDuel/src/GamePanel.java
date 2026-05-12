@@ -15,10 +15,18 @@ public class GamePanel extends JPanel
     private Player p1, p2;
     private final SpriteRenderer sprites = new SpriteRenderer();
     private final List<MapHazard> hazards = new ArrayList<>();
-    private final List<Particle> particles = new ArrayList<>();
+    private final ParticlePool particlePool = new ParticlePool();
+    private final ArrowPool arrowPool = new ArrowPool();
     private final List<PowerUp> powerUps = new ArrayList<>();
     private int hazardTimer = 0, powerUpTimer = 0;
     private static final int PU_IV = 600;
+
+    private static final Font FPS_FONT = new Font("Monospaced", Font.BOLD, 12);
+    private static final Color FLASH_COL = new Color(255, 255, 255);
+    
+    // Night mask constants
+    private static final float[] NIGHT_GRAD_STEPS = { 0f, 0.55f, 1f };
+    private static final Color NIGHT_BASE_OVERLAY = new Color(0, 0, 0, 215);
 
     private GameState state = GameState.LOADING, prevState = GameState.PLAYING, subReturnState = GameState.MAIN_MENU;
 
@@ -46,6 +54,11 @@ public class GamePanel extends JPanel
     private static final int WIN_ROUNDS = 2;
     private int countdownTick = 0, matchTick = 0, shrinkLevel = 0, gameTick = 0;
     private int flashAlpha = 0;
+
+    // Performance monitoring
+    private int fps = 0;
+    private int frameCount = 0;
+    private long lastFpsTime = 0;
     private String winTxt = "";
     private int slowMoTick = 0;
     private float slowMoRatio = 0;
@@ -62,6 +75,8 @@ public class GamePanel extends JPanel
     private boolean pulseUp = true;
     private final Random rng = new Random();
     private BufferedImage buffer;
+    private BufferedImage nightMask;
+    private BufferedImage lightSprite;
     private final Timer timer;
 
     public GamePanel() {
@@ -79,6 +94,11 @@ public class GamePanel extends JPanel
         }
         timer = new Timer(TICK_MS, this);
         timer.start();
+        try {
+            lightSprite = javax.imageio.ImageIO.read(new java.io.File("assets/fx/light.png"));
+        } catch (Exception e) {
+            System.err.println("Could not load light sprite");
+        }
         if (bgmOn)
             AudioManager.startBGM();
     }
@@ -96,11 +116,11 @@ public class GamePanel extends JPanel
             int islandTop = ArenaData.GY - 60;
             int islandLeft = ArenaData.W / 2 - 160;
             float spawnY = islandTop - Player.H;
-            p1 = new Player(0, islandLeft + 20, spawnY, sprites);
-            p2 = new Player(1, islandLeft + 320 - Player.W - 20, spawnY, sprites);
+            p1 = new Player(0, islandLeft + 20, spawnY, sprites, arrowPool);
+            p2 = new Player(1, islandLeft + 320 - Player.W - 20, spawnY, sprites, arrowPool);
         } else {
-            p1 = new Player(0, 100, Arena.GROUND_Y - Player.H, sprites);
-            p2 = new Player(1, GameWindow.WIDTH - 100 - Player.W, Arena.GROUND_Y - Player.H, sprites);
+            p1 = new Player(0, 100, Arena.GROUND_Y - Player.H, sprites, arrowPool);
+            p2 = new Player(1, GameWindow.WIDTH - 100 - Player.W, Arena.GROUND_Y - Player.H, sprites, arrowPool);
         }
 
         p1.setIceMode(selMap.hasIce);
@@ -110,7 +130,9 @@ public class GamePanel extends JPanel
         hazards.clear();
         hazardTimer = 0;
         buildHazards();
-        particles.clear();
+        // Reset pools
+        for (Particle p : particlePool.getPool()) p.active = false;
+        for (Arrow a : arrowPool.getPool()) a.active = false;
         powerUps.clear();
         winner = 0;
         flashAlpha = 0;
@@ -205,8 +227,7 @@ public class GamePanel extends JPanel
             // correctly, but do NOT process any input-driven logic.
             p1.updateGravityOnly(arena.getPlatforms());
             p2.updateGravityOnly(arena.getPlatforms());
-            particles.forEach(Particle::update);
-            particles.removeIf(pp -> pp.alpha <= 0);
+            particlePool.getPool().forEach(Particle::update);
             if (flashAlpha > 0)
                 flashAlpha -= 12;
             return;
@@ -248,8 +269,7 @@ public class GamePanel extends JPanel
         checkPU();
         checkHazards();
         checkFall();
-        particles.forEach(Particle::update);
-        particles.removeIf(pp -> pp.alpha <= 0);
+        particlePool.getPool().forEach(Particle::update);
         if (flashAlpha > 0)
             flashAlpha -= 12;
     }
@@ -261,8 +281,7 @@ public class GamePanel extends JPanel
             p1.update(arena.getPlatforms());
             p2.update(arena.getPlatforms());
         }
-        particles.forEach(Particle::update);
-        particles.removeIf(pp -> pp.alpha <= 0);
+        particlePool.getPool().forEach(Particle::update);
         if (flashAlpha > 0)
             flashAlpha -= 4;
         if (slowMoTick >= SLOW_DUR)
@@ -401,7 +420,7 @@ public class GamePanel extends JPanel
     private void parts(float cx, float cy, Color c, int n) {
         for (int i = 0; i < n; i++) {
             float vx = (rng.nextFloat() - 0.5f) * 9, vy = (rng.nextFloat() - 0.5f) * 9 - 2;
-            particles.add(new Particle(cx, cy, vx, vy, 3 + rng.nextInt(6), c));
+            particlePool.obtain(cx, cy, vx, vy, 3 + rng.nextInt(6), c);
         }
     }
 
@@ -409,6 +428,16 @@ public class GamePanel extends JPanel
     @Override
     protected void paintComponent(Graphics gRaw) {
         super.paintComponent(gRaw);
+        
+        // FPS Tracking
+        frameCount++;
+        long now = System.currentTimeMillis();
+        if (now - lastFpsTime >= 1000) {
+            fps = frameCount;
+            frameCount = 0;
+            lastFpsTime = now;
+        }
+
         if (buffer == null || buffer.getWidth() != getWidth())
             buffer = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
         Graphics2D g = buffer.createGraphics();
@@ -424,6 +453,11 @@ public class GamePanel extends JPanel
             case EXIT_CONFIRM -> GameRenderer.drawExitConfirm(g, exitCursor, mouseX, mouseY);
             default -> drawGame(g);
         }
+        // Draw FPS
+        g.setFont(FPS_FONT);
+        g.setColor(Color.GREEN);
+        g.drawString("FPS: " + fps, 10, getHeight() - 10);
+
         g.dispose();
         gRaw.drawImage(buffer, 0, 0, null);
     }
@@ -443,7 +477,7 @@ public class GamePanel extends JPanel
         hazards.forEach(h -> h.draw(g));
         p1.draw(g);
         p2.draw(g);
-        GameRenderer.drawParticles(g, particles);
+        GameRenderer.drawParticles(g, particlePool.getPool());
         if (flashAlpha > 0) {
             g.setColor(new Color(255, 255, 255, Math.min(flashAlpha, 180)));
             g.fillRect(-ox, -oy, GameWindow.WIDTH, GameWindow.HEIGHT);
@@ -462,22 +496,26 @@ public class GamePanel extends JPanel
     }
 
     private void drawNight(Graphics2D g) {
-        BufferedImage dk = new BufferedImage(GameWindow.WIDTH, GameWindow.HEIGHT, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D dg = dk.createGraphics();
-        dg.setColor(new Color(0, 0, 0, 215));
+        if (nightMask == null || nightMask.getWidth() != GameWindow.WIDTH) {
+            nightMask = new BufferedImage(GameWindow.WIDTH, GameWindow.HEIGHT, BufferedImage.TYPE_INT_ARGB);
+        }
+        Graphics2D dg = nightMask.createGraphics();
+        dg.setComposite(AlphaComposite.Src);
+        dg.setColor(NIGHT_BASE_OVERLAY);
         dg.fillRect(0, 0, GameWindow.WIDTH, GameWindow.HEIGHT);
-        for (Player pp : new Player[] { p1, p2 }) {
-            if (!pp.isAlive())
-                continue;
-            int cx = (int) pp.getCenterX(), cy = (int) pp.getCenterY(), r = 175;
-            RadialGradientPaint rp = new RadialGradientPaint(new Point(cx, cy), r, new float[] { 0f, 0.55f, 1f },
-                    new Color[] { new Color(0, 0, 0, 0), new Color(0, 0, 0, 130), new Color(0, 0, 0, 215) });
+
+        if (lightSprite != null) {
             dg.setComposite(AlphaComposite.getInstance(AlphaComposite.DST_OUT));
-            dg.setPaint(rp);
-            dg.fillOval(cx - r, cy - r, r * 2, r * 2);
+            for (Player pp : new Player[] { p1, p2 }) {
+                if (!pp.isAlive())
+                    continue;
+                int r = 175;
+                int cx = (int) pp.getCenterX() - r, cy = (int) pp.getCenterY() - r;
+                dg.drawImage(lightSprite, cx, cy, r * 2, r * 2, null);
+            }
         }
         dg.dispose();
-        g.drawImage(dk, 0, 0, null);
+        g.drawImage(nightMask, 0, 0, null);
     }
 
     private void drawPU(Graphics2D g, PowerUp pu) {
