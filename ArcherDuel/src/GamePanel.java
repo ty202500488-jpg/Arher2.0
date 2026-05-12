@@ -27,14 +27,14 @@ public class GamePanel extends JPanel
     private static final int LOAD_DUR = 150;
 
     // Menu cursors
-    private int menuCursor = 0; // 0=PLAY 1=CONTROLS 2=SETTINGS 3=EXIT
+    private int menuCursor = -1; // 0=PLAY 1=CONTROLS 2=SETTINGS 3=EXIT
     private static final int MENU_COUNT = 4;
     private int mapCursor = 0;
     private MapTheme selMap = MapTheme.FOREST;
     private float mapTrans = 0;
     private int mapTransDir = 0;
-    private int resultCursor = 0; // 0=Rematch 1=MapSelect 2=MainMenu
-    private int pauseCursor = 0; // 0=Resume 1=Restart 2=Settings 3=MainMenu
+    private int resultCursor = -1; // 0=Rematch 1=MapSelect 2=MainMenu
+    private int pauseCursor = -1; // 0=Resume 1=Restart 2=Settings 3=MainMenu
     private static final int PAUSE_COUNT = 4, RESULT_COUNT = 3;
 
     // Settings
@@ -543,7 +543,7 @@ public class GamePanel extends JPanel
         if (c == KeyEvent.VK_ESCAPE) {
             if (state == GameState.PLAYING) {
                 prevState = state;
-                pauseCursor = 0;
+                pauseCursor = -1;
                 state = GameState.PAUSED;
             } else if (state == GameState.PAUSED)
                 state = prevState;
@@ -681,12 +681,24 @@ public class GamePanel extends JPanel
     public void mouseMoved(MouseEvent e) {
         mouseX = e.getX();
         mouseY = e.getY();
+        updateHoverCursors();
     }
 
     @Override
     public void mouseDragged(MouseEvent e) {
         mouseX = e.getX();
         mouseY = e.getY();
+        updateHoverCursors();
+    }
+
+    private void updateHoverCursors() {
+        if (state == GameState.MAIN_MENU) {
+            menuCursor = GameRenderer.menuHit(mouseX, mouseY);
+        } else if (state == GameState.PAUSED) {
+            pauseCursor = GameRenderer.pauseHit(mouseX, mouseY);
+        } else if (state == GameState.OVER) {
+            resultCursor = GameRenderer.resultHit(mouseX, mouseY);
+        }
     }
 
     @Override

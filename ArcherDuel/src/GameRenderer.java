@@ -329,7 +329,7 @@ public class GameRenderer {
         }
         // Start btn
         Rectangle sb = btn(cx, py + ph + 75, 220, 44);
-        drawBtn(g, sb, "START  MATCH", true, sb.contains(mx, my));
+        drawBtn(g, sb, "START  MATCH", false, sb.contains(mx, my));
         txt(g, "◄ ►  Change Map     ESC = Back", cx, H - 22, F11, new Color(120, 110, 80));
     }
 
@@ -362,7 +362,7 @@ public class GameRenderer {
         String[] bl = { "BACK", "START MATCH" };
         for (int i = 0; i < 2; i++) {
             Rectangle r = ctrlBtn(i);
-            drawBtn(g, r, bl[i], i == 1, r.contains(mx, my));
+            drawBtn(g, r, bl[i], false, r.contains(mx, my));
         }
         txt(g, "ESC = Back    ENTER = Start Match", W / 2, H - 22, F11, new Color(130, 115, 80));
     }
