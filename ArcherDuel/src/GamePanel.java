@@ -20,7 +20,7 @@ public class GamePanel extends JPanel
     private int hazardTimer = 0, powerUpTimer = 0;
     private static final int PU_IV = 600;
 
-    private GameState state = GameState.LOADING, prevState = GameState.PLAYING;
+    private GameState state = GameState.LOADING, prevState = GameState.PLAYING, subReturnState = GameState.MAIN_MENU;
 
     // Loading
     private int loadTick = 0;
@@ -530,7 +530,7 @@ public class GamePanel extends JPanel
         }
         if (state == GameState.CONTROLS) {
             if (c == KeyEvent.VK_ENTER || c == KeyEvent.VK_SPACE || c == KeyEvent.VK_ESCAPE)
-                state = GameState.MAIN_MENU;
+                state = subReturnState;
             return;
         }
         if (state == GameState.SETTINGS) {
@@ -601,15 +601,24 @@ public class GamePanel extends JPanel
 
     private void selectMenu(int i) {
         switch (i) {
-            case 0 -> state = GameState.MAP_SELECT;
-            case 1 -> state = GameState.CONTROLS;
-            case 2 -> state = GameState.SETTINGS;
+            case 0 -> {
+                subReturnState = state;
+                state = GameState.MAP_SELECT;
+            }
+            case 1 -> {
+                subReturnState = state;
+                state = GameState.CONTROLS;
+            }
+            case 2 -> {
+                subReturnState = state;
+                state = GameState.SETTINGS;
+            }
             case 3 -> confirmExit();
         }
     }
 
     public void confirmExit() {
-        prevState = state;
+        subReturnState = state;
         exitCursor = 1; // Default to NO for safety
         state = GameState.EXIT_CONFIRM;
     }
@@ -626,8 +635,10 @@ public class GamePanel extends JPanel
     }
 
     private void selectExit(int i) {
-        if (i == 0) System.exit(0);
-        else state = prevState;
+        if (i == 0)
+            System.exit(0);
+        else
+            state = subReturnState;
     }
 
     private void navMap(int c) {
@@ -658,7 +669,7 @@ public class GamePanel extends JPanel
         if (c == KeyEvent.VK_ENTER) {
         }
         if (c == KeyEvent.VK_ESCAPE)
-            state = GameState.MAIN_MENU;
+            state = subReturnState;
     }
 
     private void navPause(int c) {
@@ -679,7 +690,10 @@ public class GamePanel extends JPanel
                 startRound();
                 state = GameState.PLAYING;
             }
-            case 2 -> state = GameState.SETTINGS;
+            case 2 -> {
+                subReturnState = state;
+                state = GameState.SETTINGS;
+            }
             case 3 -> state = GameState.MAIN_MENU;
         }
     }
@@ -781,7 +795,7 @@ public class GamePanel extends JPanel
             case CONTROLS -> {
                 int i = GameRenderer.controlsHit(mx, my);
                 if (i == 0)
-                    state = GameState.MAIN_MENU;
+                    state = subReturnState;
             }
             case SETTINGS -> {
                 int i = GameRenderer.settingsHit(mx, my);
@@ -794,7 +808,7 @@ public class GamePanel extends JPanel
                 } else if (i == 1)
                     sfxOn = !sfxOn;
                 else if (i == 2)
-                    state = GameState.MAIN_MENU;
+                    state = subReturnState;
             }
             case PAUSED -> {
                 int i = GameRenderer.pauseHit(mx, my);
