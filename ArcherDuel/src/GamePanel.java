@@ -17,8 +17,7 @@ public class GamePanel extends JPanel
     private final List<MapHazard> hazards = new ArrayList<>();
     private final ParticlePool particlePool = new ParticlePool();
     private final ArrowPool arrowPool = new ArrowPool();
-    private final List<PowerUp> powerUps = new ArrayList<>();
-    private int hazardTimer = 0, powerUpTimer = 0;
+    private int hazardTimer = 0;
     private static final int PU_IV = 600;
 
     private static final Font FPS_FONT = new Font("Monospaced", Font.BOLD, 12);
@@ -133,14 +132,12 @@ public class GamePanel extends JPanel
         // Reset pools
         for (Particle p : particlePool.getPool()) p.active = false;
         for (Arrow a : arrowPool.getPool()) a.active = false;
-        powerUps.clear();
         winner = 0;
         flashAlpha = 0;
         countdownTick = 0;
         matchTick = 0;
         shrinkLevel = 0;
         slowMoTick = 0;
-        powerUpTimer = 0;
         gameTick = 0;
     }
 
@@ -237,12 +234,6 @@ public class GamePanel extends JPanel
             shrinkLevel++;
             arena.shrink(shrinkLevel);
         }
-        powerUpTimer++;
-        if (powerUpTimer >= PU_IV) {
-            powerUpTimer = 0;
-            powerUps.add(new PowerUp(200 + rng.nextFloat() * (GameWindow.WIDTH - 400), Arena.GROUND_Y - 130,
-                    rng.nextInt(2)));
-        }
         hazardTimer++;
         int hiv = selMap == MapTheme.VOLCANO ? 110 : selMap == MapTheme.CASTLE ? 190 : 0;
         if (hiv > 0 && hazardTimer >= hiv) {
@@ -266,7 +257,6 @@ public class GamePanel extends JPanel
         hazards.forEach(MapHazard::update);
         hazards.removeIf(h -> !h.active);
         checkArrows();
-        checkPU();
         checkHazards();
         checkFall();
         particlePool.getPool().forEach(Particle::update);
@@ -330,27 +320,6 @@ public class GamePanel extends JPanel
         }
     }
 
-    private void checkPU() {
-        for (PowerUp pu : powerUps) {
-            if (!pu.active)
-                continue;
-            Rectangle r = new Rectangle((int) pu.x - 15, (int) pu.y - 15, 30, 30);
-            if (p1.isAlive() && p1.getBounds().intersects(r))
-                applyPU(pu, p1);
-            else if (p2.isAlive() && p2.getBounds().intersects(r))
-                applyPU(pu, p2);
-        }
-        powerUps.removeIf(pu -> !pu.active);
-    }
-
-    private void applyPU(PowerUp pu, Player p) {
-        pu.active = false;
-        parts(pu.x, pu.y, pu.type == 0 ? new Color(80, 255, 80) : new Color(255, 220, 0), 12);
-        if (pu.type == 0) {
-            p.hp = Math.min(p.hp + 1, Player.MAX_HP);
-            p.rageMode = (p.hp <= 1);
-        }
-    }
 
     private void checkHazards() {
         for (MapHazard h : hazards) {
@@ -472,8 +441,6 @@ public class GamePanel extends JPanel
         arena.draw(g);
         if (selMap == MapTheme.NIGHT)
             drawNight(g);
-        for (PowerUp pu : powerUps)
-            drawPU(g, pu);
         hazards.forEach(h -> h.draw(g));
         p1.draw(g);
         p2.draw(g);
@@ -518,20 +485,6 @@ public class GamePanel extends JPanel
         g.drawImage(nightMask, 0, 0, null);
     }
 
-    private void drawPU(Graphics2D g, PowerUp pu) {
-        if (!pu.active)
-            return;
-        long t = System.currentTimeMillis();
-        float pp = (float) (Math.sin(t / 300.0) * 0.4 + 0.6);
-        Color c = pu.type == 0 ? new Color(80, 255, 80) : new Color(255, 220, 0);
-        g.setColor(new Color(c.getRed(), c.getGreen(), c.getBlue(), (int) (pp * 80)));
-        g.fillOval((int) pu.x - 20, (int) pu.y - 20, 40, 40);
-        g.setColor(c);
-        g.fillOval((int) pu.x - 10, (int) pu.y - 10, 20, 20);
-        g.setColor(Color.BLACK);
-        g.setFont(new java.awt.Font("Monospaced", java.awt.Font.BOLD, 14));
-        g.drawString(pu.type == 0 ? "+" : "»", (int) pu.x - 5, (int) pu.y + 5);
-    }
 
     // ── Key input ──────────────────────────────────────────────────
     /** Returns true if the countdown is still running (players must not act yet). */

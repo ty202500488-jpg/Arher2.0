@@ -1,5 +1,6 @@
 import java.awt.*;
 import java.awt.geom.*;
+import java.awt.image.BufferedImage;
 import java.util.Random;
 
 /**
@@ -18,6 +19,7 @@ public class Arena {
 
     // Ambient particle data (fireflies / snowflakes / embers / stars)
     private final int[][] pts = new int[60][3];
+    private BufferedImage bgCache;
 
     // ── Cached Color constants (avoid per-frame allocation ~60x/sec) ─────
     // FOREST
@@ -178,24 +180,33 @@ public class Arena {
 
     // ── FOREST ────────────────────────────────────────────────────
     private void drawForest(Graphics2D g) {
-        grad(g, FC_BG1, FC_BG2);
-        // Far tree layer
-        g.setColor(FC_TREE_FAR);
-        for (int x = 0; x < W(); x += 90) { int h2 = 420 + (x % 120); g.fillOval(x - 20, GROUND_Y - h2, 130, h2); }
-        // Mid tree layer
-        drawTrees(g, FC_TREE_D, FC_TREE_M);
-        // God rays
-        drawRays(g);
-        // Ground fog
-        g.setPaint(new GradientPaint(0, GROUND_Y - 55, FC_FOG0, 0, GROUND_Y, FC_FOG1));
-        g.fillRect(0, GROUND_Y - 55, W(), 55); g.setPaint(null);
-        // Platforms
-        drawAllPlatforms(g, FC_PLAT_S, FC_PLAT_M, true);
-        // Barrels
-        drawBarrel(g, 420, GROUND_Y); drawBarrel(g, 960, GROUND_Y);
-        drawBarrel(g, W()/2 - 50, GROUND_Y); drawBarrel(g, W()/2 + 30, GROUND_Y);
-        // Fireflies
-        drawAmb(g, FC_AMB_G, FC_AMB_C);
+        if (bgCache == null) {
+            bgCache = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_ARGB);
+            Graphics2D g2 = bgCache.createGraphics();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            
+            grad(g2, FC_BG1, FC_BG2);
+            // Far tree layer
+            g2.setColor(FC_TREE_FAR);
+            for (int x = 0; x < WIDTH; x += 90) { 
+                int h2 = 420 + (x % 120); 
+                g2.fillOval(x - 20, GROUND_Y - h2, 130, h2); 
+            }
+            // Mid tree layer
+            drawTrees(g2, FC_TREE_D, FC_TREE_M);
+
+            // Static Platforms
+            drawAllPlatforms(g2, FC_PLAT_S, FC_PLAT_M, true);
+
+            // Barrels
+            drawBarrel(g2, 420, GROUND_Y); 
+            drawBarrel(g2, 960, GROUND_Y);
+            drawBarrel(g2, WIDTH/2 - 50, GROUND_Y); 
+            drawBarrel(g2, WIDTH/2 + 30, GROUND_Y);
+            
+            g2.dispose();
+        }
+        g.drawImage(bgCache, 0, 0, null);
     }
 
     // ── CASTLE ────────────────────────────────────────────────────
@@ -430,14 +441,18 @@ public class Arena {
         g.setColor(m);
         g.fillRect(r.x, r.y, r.width, 7);
         // ── TOP EDGE HIGHLIGHT (readability) ──
-        g.setColor(PLT_HILITE);
-        g.fillRect(r.x+1, r.y, r.width-2, 2);
+        if (data.theme != MapTheme.FOREST) {
+            g.setColor(PLT_HILITE);
+            g.fillRect(r.x + 1, r.y, r.width - 2, 2);
+        }
         // Moss tufts
         g.setColor(m.brighter());
         for (int x = r.x+4; x < r.x+r.width-4; x += 7) g.drawLine(x, r.y, x, r.y-3-(x%3));
         // Underside shadow for depth
-        g.setColor(PLT_SHADOW);
-        g.fillRect(r.x, r.y+r.height, r.width, 4);
+        if (data.theme != MapTheme.FOREST) {
+            g.setColor(PLT_SHADOW);
+            g.fillRect(r.x, r.y+r.height, r.width, 4);
+        }
         // Vines
         if (vines) {
             g.setColor(VINE_GRN);
@@ -452,7 +467,7 @@ public class Arena {
             g.setStroke(STROKE1);
         }
         // Moving platform highlight
-        if (moving) {
+        if (moving && data.theme != MapTheme.FOREST) {
             long t = System.currentTimeMillis();
             float p = (float)(Math.sin(t/250.0)*0.5+0.5);
             g.setColor(new Color(255, 220, 80, (int)(p*130)));
@@ -501,6 +516,7 @@ public class Arena {
     }
 
     private void drawMovingPlatformGlow(Graphics2D g) {
+        if (data.theme == MapTheme.FOREST) return;
         long t = System.currentTimeMillis();
         for (int i = 0; i < data.platforms.length; i++) {
             if (!data.isMovingPlatform(i))
