@@ -83,12 +83,20 @@ public class GameRenderer {
     }
 
     static int mapHit(int x, int y, int n) {
-        if (new Rectangle(W / 2 - 380, H / 2 - 50, 80, 44).contains(x, y))
-            return 0;
-        if (new Rectangle(W / 2 + 300, H / 2 - 50, 80, 44).contains(x, y))
-            return 1;
-        if (btn(W / 2, H / 2 + 200, 220, 44).contains(x, y))
-            return 2;
+        int cx = W / 2, py = 80, pw = 640, ph = 370;
+        // Arrows
+        if (new Rectangle(cx - 380, py + ph / 2 - 22, 80, 44).contains(x, y))
+            return 0; // Left
+        if (new Rectangle(cx + 300, py + ph / 2 - 22, 80, 44).contains(x, y))
+            return 1; // Right
+        // Start button
+        if (new Rectangle(cx - 110, py + ph + 75, 220, 44).contains(x, y))
+            return 2; // Start Match
+        // Dots
+        for (int i = 0; i < n; i++) {
+            if (new Rectangle(cx - n * 11 + i * 22, py + ph + 16, 14, 14).contains(x, y))
+                return 10 + i; // 10+i = Dot index
+        }
         return -1;
     }
 

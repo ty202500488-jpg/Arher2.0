@@ -161,7 +161,8 @@ public class GamePanel extends JPanel
                 if (loadTick >= LOAD_DUR)
                     state = GameState.MAIN_MENU;
             }
-            case MAIN_MENU, MAP_SELECT, CONTROLS, SETTINGS, PAUSED, OVER, EXIT_CONFIRM -> {
+            case MAP_SELECT -> updateMapSelect();
+            case MAIN_MENU, CONTROLS, SETTINGS, PAUSED, OVER, EXIT_CONFIRM -> {
             }
             case PLAYING -> updatePlaying();
             case SLOW_MO -> updateSlowMo();
@@ -641,6 +642,14 @@ public class GamePanel extends JPanel
             state = subReturnState;
     }
 
+    private void updateMapSelect() {
+        if (mapTrans > 0) {
+            mapTrans -= 0.1f;
+            if (mapTrans < 0)
+                mapTrans = 0;
+        }
+    }
+
     private void navMap(int c) {
         MapTheme[] m = MapTheme.values();
         if (c == KeyEvent.VK_LEFT || c == KeyEvent.VK_A) {
@@ -790,6 +799,13 @@ public class GamePanel extends JPanel
                 } else if (i == 2) {
                     selMap = MapTheme.values()[mapCursor];
                     startMatch();
+                } else if (i >= 10) {
+                    int dot = i - 10;
+                    if (dot != mapCursor) {
+                        mapTransDir = (dot > mapCursor) ? 1 : -1;
+                        mapTrans = 1;
+                        mapCursor = dot;
+                    }
                 }
             }
             case CONTROLS -> {
