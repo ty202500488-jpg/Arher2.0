@@ -38,8 +38,11 @@ public class Player {
     private boolean extFirePressed = false, extDashPressed = false;
 
     private final boolean[] keys = new boolean[65536];
-    private final int KEY_L, KEY_R, KEY_UP, KEY_DASH, KEY_FIRE;
+    private final int KEY_L, KEY_R, KEY_UP, KEY_DOWN, KEY_DASH, KEY_FIRE;
     private final boolean useExtFire, useExtDash; // P2 uses external injection
+
+    private int downPressTimer = 0;
+    private int dropThroughTimer = 0;
 
     private final AnimationController anim = new AnimationController();
     private final SpriteRenderer sprites;
@@ -55,6 +58,7 @@ public class Player {
             KEY_L = KeyEvent.VK_A;
             KEY_R = KeyEvent.VK_D;
             KEY_UP = KeyEvent.VK_W;
+            KEY_DOWN = KeyEvent.VK_S;
             KEY_DASH = KeyEvent.VK_SHIFT;
             KEY_FIRE = KeyEvent.VK_F;
             useExtFire = false;
@@ -63,6 +67,7 @@ public class Player {
             KEY_L = KeyEvent.VK_LEFT;
             KEY_R = KeyEvent.VK_RIGHT;
             KEY_UP = KeyEvent.VK_UP;
+            KEY_DOWN = KeyEvent.VK_DOWN;
             KEY_DASH = -1;
             KEY_FIRE = -1; // injected externally
             useExtFire = true;
@@ -90,8 +95,17 @@ public class Player {
     }
 
     public void keyPressed(int c) {
-        if (c < keys.length)
+        if (c < keys.length) {
+            if (!keys[c] && c == KEY_DOWN) {
+                if (downPressTimer > 0) {
+                    dropThroughTimer = 15;
+                    downPressTimer = 0;
+                } else {
+                    downPressTimer = 15;
+                }
+            }
             keys[c] = true;
+        }
         // P1 alternate jump
         if (playerIndex == 0 && c == KeyEvent.VK_SPACE)
             keys[KEY_UP] = true;
@@ -117,11 +131,15 @@ public class Player {
             anim.tick();
             return;
         }
+        if (downPressTimer > 0) downPressTimer--;
+        if (dropThroughTimer > 0) dropThroughTimer--;
+
         // Gravity
         vy = Math.min(vy + GRAV, MAX_FALL);
         y += vy;
         onGround = false;
         for (Rectangle r : plats) {
+            if (dropThroughTimer > 0 && r.height < 50) continue;
             Rectangle f = new Rectangle((int) x, (int) y + H - 4, W, 8);
             if (f.intersects(r) && vy >= 0) {
                 y = r.y - H;
@@ -138,6 +156,9 @@ public class Player {
     }
 
     public void update(Rectangle[] plats) {
+        if (downPressTimer > 0) downPressTimer--;
+        if (dropThroughTimer > 0) dropThroughTimer--;
+
         if (iFrames > 0)
             iFrames--;
         if (!alive) {
@@ -210,6 +231,7 @@ public class Player {
         y += vy;
         onGround = false;
         for (Rectangle r : plats) {
+            if (dropThroughTimer > 0 && r.height < 50) continue;
             Rectangle f = new Rectangle((int) x, (int) y + H - 4, W, 8);
             if (f.intersects(r) && vy >= 0) {
                 y = r.y - H;
