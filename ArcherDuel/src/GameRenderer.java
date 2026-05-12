@@ -67,9 +67,8 @@ public class GameRenderer {
     }
 
     static int controlsHit(int x, int y) {
-        for (int i = 0; i < 2; i++)
-            if (ctrlBtn(i).contains(x, y))
-                return i;
+        if (ctrlBtn(0).contains(x, y))
+            return 0;
         return -1;
     }
 
@@ -369,12 +368,9 @@ public class GameRenderer {
         txt(g, "Headshot = 2 damage    Dash = Invincible    Hold shoot = Charge", W / 2, 392, F11,
                 new Color(170, 170, 170));
         // Buttons
-        String[] bl = { "BACK", "START MATCH" };
-        for (int i = 0; i < 2; i++) {
-            Rectangle r = ctrlBtn(i);
-            drawBtn(g, r, bl[i], false, r.contains(mx, my));
-        }
-        txt(g, "ESC = Back    ENTER = Start Match", W / 2, H - 22, F11, new Color(130, 115, 80));
+        Rectangle r = ctrlBtn(0);
+        drawBtn(g, r, "BACK", true, r.contains(mx, my));
+        txt(g, "ESC / ENTER = Back", W / 2, H - 22, F11, new Color(130, 115, 80));
     }
 
     // ── SETTINGS ──────────────────────────────────────────────────

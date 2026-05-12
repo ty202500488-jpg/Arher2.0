@@ -529,10 +529,8 @@ public class GamePanel extends JPanel
             return;
         }
         if (state == GameState.CONTROLS) {
-            if (c == KeyEvent.VK_ENTER || c == KeyEvent.VK_SPACE) {
-                startMatch();
-            } else if (c == KeyEvent.VK_ESCAPE)
-                state = GameState.MAP_SELECT;
+            if (c == KeyEvent.VK_ENTER || c == KeyEvent.VK_SPACE || c == KeyEvent.VK_ESCAPE)
+                state = GameState.MAIN_MENU;
             return;
         }
         if (state == GameState.SETTINGS) {
@@ -646,7 +644,7 @@ public class GamePanel extends JPanel
         }
         if (c == KeyEvent.VK_ENTER || c == KeyEvent.VK_SPACE) {
             selMap = m[mapCursor];
-            state = GameState.CONTROLS;
+            startMatch();
         }
         if (c == KeyEvent.VK_ESCAPE)
             state = GameState.MAIN_MENU;
@@ -777,15 +775,13 @@ public class GamePanel extends JPanel
                     mapCursor = (mapCursor + 1) % MapTheme.values().length;
                 } else if (i == 2) {
                     selMap = MapTheme.values()[mapCursor];
-                    state = GameState.CONTROLS;
+                    startMatch();
                 }
             }
             case CONTROLS -> {
                 int i = GameRenderer.controlsHit(mx, my);
                 if (i == 0)
-                    state = GameState.MAP_SELECT;
-                else if (i == 1)
-                    startMatch();
+                    state = GameState.MAIN_MENU;
             }
             case SETTINGS -> {
                 int i = GameRenderer.settingsHit(mx, my);
