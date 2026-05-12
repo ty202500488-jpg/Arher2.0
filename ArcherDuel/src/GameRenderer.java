@@ -410,11 +410,6 @@ public class GameRenderer {
             g.drawString(p1c[i], col1, py + 58 + i * 38);
             g.drawString(p2c[i], col2, py + 58 + i * 38);
         }
-        // Tips panel
-        panel(g, W / 2 - 320, 340, 640, 80);
-        txt(g, "TIPS", W / 2, 364, F14, GOLD);
-        txt(g, "Headshot = 2 damage    Dash = Invincible    Hold shoot = Charge", W / 2, 392, F11,
-                CTRL_TEXT);
         // Buttons
         Rectangle r = ctrlBtn(0);
         drawBtn(g, r, "BACK", true, r.contains(mx, my));
