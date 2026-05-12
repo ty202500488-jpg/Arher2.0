@@ -16,6 +16,8 @@ public class AudioManager {
     /** Starts a richer MIDI background music loop. */
     public static void startBGM() {
         try {
+            if (sequencer != null && sequencer.isOpen())
+                return;
             sequencer = MidiSystem.getSequencer();
             sequencer.open();
 
@@ -52,8 +54,24 @@ public class AudioManager {
         }
     }
 
+    /** Stops and closes the BGM sequencer. */
+    public static void stopBGM() {
+        try {
+            if (sequencer != null) {
+                if (sequencer.isRunning())
+                    sequencer.stop();
+                if (sequencer.isOpen())
+                    sequencer.close();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     /** Play a sound effect on a background thread. */
     public static void play(Sound sound) {
+        if (!GamePanel.sfxOn)
+            return;
         new Thread(() -> {
             try {
                 byte[] data = generateSoundData(sound);

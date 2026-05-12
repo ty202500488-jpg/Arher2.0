@@ -78,7 +78,8 @@ public class GamePanel extends JPanel
         }
         timer = new Timer(TICK_MS, this);
         timer.start();
-        AudioManager.startBGM();
+        if (bgmOn)
+            AudioManager.startBGM();
     }
 
     // ── Reset ──────────────────────────────────────────────────────
@@ -758,9 +759,13 @@ public class GamePanel extends JPanel
             }
             case SETTINGS -> {
                 int i = GameRenderer.settingsHit(mx, my);
-                if (i == 0)
+                if (i == 0) {
                     bgmOn = !bgmOn;
-                else if (i == 1)
+                    if (bgmOn)
+                        AudioManager.startBGM();
+                    else
+                        AudioManager.stopBGM();
+                } else if (i == 1)
                     sfxOn = !sfxOn;
                 else if (i == 2)
                     state = GameState.MAIN_MENU;
