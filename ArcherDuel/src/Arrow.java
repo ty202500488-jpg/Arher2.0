@@ -11,9 +11,9 @@ public class Arrow {
 
     // ── constants ─────────────────────────────────────────────────
     public static final int SIZE = 22; // collision bounding box
-    public static final float BASE_SPEED = 9f;
-    public static final float MAX_SPEED = 22f;
-    public static final float GRAVITY = 0.28f; // arrow gravity drop per tick
+    public static final float BASE_SPEED = 11f;
+    public static final float MAX_SPEED  = 17f;
+    public static final float GRAVITY    = 0.22f; // arrow gravity drop per tick
     public static final float WIND_FACTOR = 0.04f; // scale of wind applied per tick
 
     // ── state ─────────────────────────────────────────────────────

@@ -194,6 +194,21 @@ public class GamePanel extends JPanel
         gameTick++;
         if (shakeTick > 0)
             shakeTick--;
+
+        // Advance countdown; players cannot act until it reaches 180 ("FIGHT!")
+        if (countdownTick < 180) {
+            countdownTick++;
+            // During countdown: apply gravity / platform collision so players land
+            // correctly, but do NOT process any input-driven logic.
+            p1.updateGravityOnly(arena.getPlatforms());
+            p2.updateGravityOnly(arena.getPlatforms());
+            particles.forEach(Particle::update);
+            particles.removeIf(pp -> pp.alpha <= 0);
+            if (flashAlpha > 0)
+                flashAlpha -= 12;
+            return;
+        }
+
         if (matchTick % 1200 == 0 && matchTick > 0) {
             shrinkLevel++;
             arena.shrink(shrinkLevel);
@@ -234,9 +249,6 @@ public class GamePanel extends JPanel
         particles.removeIf(pp -> pp.alpha <= 0);
         if (flashAlpha > 0)
             flashAlpha -= 12;
-        // Countdown
-        if (countdownTick < 180)
-            countdownTick++;
     }
 
     private void updateSlowMo() {
@@ -480,18 +492,23 @@ public class GamePanel extends JPanel
     }
 
     // ── Key input ──────────────────────────────────────────────────
+    /** Returns true if the countdown is still running (players must not act yet). */
+    private boolean isCountdownActive() {
+        return (state == GameState.PLAYING || state == GameState.SLOW_MO) && countdownTick < 180;
+    }
+
     @Override
     public void keyPressed(KeyEvent e) {
         int c = e.getKeyCode();
-        // Right CTRL → P2 shoot
+        // Right CTRL → P2 shoot (blocked during countdown)
         if (c == KeyEvent.VK_CONTROL && e.getKeyLocation() == KeyEvent.KEY_LOCATION_RIGHT) {
-            if (p2 != null)
+            if (p2 != null && !isCountdownActive())
                 p2.setFirePressed(true);
             return;
         }
-        // Right SHIFT → P2 dash
+        // Right SHIFT → P2 dash (blocked during countdown)
         if (c == KeyEvent.VK_SHIFT && e.getKeyLocation() == KeyEvent.KEY_LOCATION_RIGHT) {
-            if (p2 != null)
+            if (p2 != null && !isCountdownActive())
                 p2.setDashPressed(true);
             return;
         }
@@ -536,10 +553,12 @@ public class GamePanel extends JPanel
             navPause(c);
             return;
         }
-        if (p1 != null)
-            p1.keyPressed(c);
-        if (p2 != null)
-            p2.keyPressed(c);
+        if (!isCountdownActive()) {
+            if (p1 != null)
+                p1.keyPressed(c);
+            if (p2 != null)
+                p2.keyPressed(c);
+        }
     }
 
     @Override
@@ -555,6 +574,7 @@ public class GamePanel extends JPanel
                 p2.setDashPressed(false);
             return;
         }
+        // Always forward key-releases so held-keys don't stay stuck after countdown ends
         if (p1 != null)
             p1.keyReleased(c);
         if (p2 != null)

@@ -12,9 +12,9 @@ import java.util.List;
  */
 public class Player {
     public static final int W = 42, H = 63, MAX_HP = 3, I_FRAMES = 40;
-    private static final float BASE_SPD = 3.8f, JUMP_POW = -12f, GRAV = 0.55f, MAX_FALL = 15f;
-    private static final int DASH_DUR = 12, DASH_CD = 45, SHOOT_CD = 28, MAX_CHARGE = 45;
-    private static final float DASH_SPD = 14f;
+    private static final float BASE_SPD = 4.2f, JUMP_POW = -13f, GRAV = 0.52f, MAX_FALL = 15f;
+    private static final int DASH_DUR = 12, DASH_CD = 50, SHOOT_CD = 30, MAX_CHARGE = 40;
+    private static final float DASH_SPD = 12f;
 
     public final int playerIndex;
     public float x, y;
@@ -104,6 +104,37 @@ public class Player {
             keys[KEY_UP] = false;
         if (!useExtFire && c == KEY_FIRE && charging)
             releaseShot();
+    }
+
+    /**
+     * Countdown-phase update: applies gravity and platform snapping only.
+     * No movement, jump, dash, or shooting input is read.
+     */
+    public void updateGravityOnly(Rectangle[] plats) {
+        if (iFrames > 0)
+            iFrames--;
+        if (!alive) {
+            anim.tick();
+            return;
+        }
+        // Gravity
+        vy = Math.min(vy + GRAV, MAX_FALL);
+        y += vy;
+        onGround = false;
+        for (Rectangle r : plats) {
+            Rectangle f = new Rectangle((int) x, (int) y + H - 4, W, 8);
+            if (f.intersects(r) && vy >= 0) {
+                y = r.y - H;
+                vy = 0;
+                onGround = true;
+                break;
+            }
+        }
+        x = Math.max(0, Math.min(x, GameWindow.WIDTH - W));
+        anim.setAnimation(SpriteRenderer.ANIM_IDLE);
+        anim.tick();
+        arrows.forEach(Arrow::update);
+        arrows.removeIf(a -> !a.active);
     }
 
     public void update(Rectangle[] plats) {
