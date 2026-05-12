@@ -327,23 +327,6 @@ public class GameRenderer {
             g.setColor(i == cur ? Color.WHITE : new Color(70, 70, 70));
             g.fillOval(cx - maps.length * 11 + i * 22, py + ph + 16, 14, 14);
         }
-        // Hazard badges
-        int bx = cx - 160, by2 = py + ph + 40;
-        if (m.hasWind) {
-            drawBadge(g, "WIND", bx, by2, new Color(60, 140, 220));
-            bx += 76;
-        }
-        if (m.hasIce) {
-            drawBadge(g, "ICE", bx, by2, new Color(100, 190, 230));
-            bx += 60;
-        }
-        if (m.hasLava) {
-            drawBadge(g, "LAVA", bx, by2, new Color(200, 70, 20));
-            bx += 66;
-        }
-        if (m.fallDeath) {
-            drawBadge(g, "FALL DEATH", bx, by2, new Color(180, 40, 40));
-        }
         // Start btn
         Rectangle sb = btn(cx, py + ph + 75, 220, 44);
         drawBtn(g, sb, "START  MATCH", false, sb.contains(mx, my));
