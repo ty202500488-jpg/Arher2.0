@@ -230,10 +230,6 @@ public class GamePanel extends JPanel
             return;
         }
 
-        if (matchTick % 1200 == 0 && matchTick > 0) {
-            shrinkLevel++;
-            arena.shrink(shrinkLevel);
-        }
         hazardTimer++;
         int hiv = selMap == MapTheme.VOLCANO ? 110 : selMap == MapTheme.CASTLE ? 190 : 0;
         if (hiv > 0 && hazardTimer >= hiv) {

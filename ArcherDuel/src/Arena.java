@@ -152,10 +152,6 @@ public class Arena {
         data.tick();
     }
 
-    public void shrink(int l) {
-        data.shrink(l);
-    }
-
     public int getLeftWall() {
         return data.getLeftWall();
     }
@@ -175,7 +171,6 @@ public class Arena {
             case NIGHT -> drawNight(g);
         }
         drawMovingPlatformGlow(g);
-        drawShrinkWalls(g);
     }
 
     // ── FOREST ────────────────────────────────────────────────────
@@ -591,22 +586,6 @@ public class Arena {
         }
     }
 
-    // ── SHRINK WALLS ──────────────────────────────────────────────
-    private void drawShrinkWalls(Graphics2D g) {
-        int so = data.getShrinkOffset();
-        if (so <= 0)
-            return;
-        long t = System.currentTimeMillis();
-        float p = (float) (Math.sin(t / 200.0) * 0.3 + 0.7);
-        g.setColor(new Color(255, 40, 20, (int) (p * 150)));
-        g.fillRect(0, 0, so, HEIGHT);
-        g.fillRect(W() - so, 0, so, HEIGHT);
-        g.setColor(new Color(255, 100, 0, (int) (p * 220)));
-        g.setStroke(STROKE3);
-        g.drawLine(so, 0, so, HEIGHT);
-        g.drawLine(W() - so, 0, W() - so, HEIGHT);
-        g.setStroke(STROKE1);
-    }
 
     private int W() {
         return WIDTH;
