@@ -35,6 +35,7 @@ public class GamePanel extends JPanel
     private int mapTransDir = 0;
     private int resultCursor = -1; // 0=Rematch 1=MapSelect 2=MainMenu
     private int pauseCursor = -1; // 0=Resume 1=Restart 2=Settings 3=MainMenu
+    private int exitCursor = 0; // 0=No 1=Yes
     private static final int PAUSE_COUNT = 4, RESULT_COUNT = 3;
 
     // Settings
@@ -160,7 +161,7 @@ public class GamePanel extends JPanel
                 if (loadTick >= LOAD_DUR)
                     state = GameState.MAIN_MENU;
             }
-            case MAIN_MENU, MAP_SELECT, CONTROLS, SETTINGS, PAUSED, OVER -> {
+            case MAIN_MENU, MAP_SELECT, CONTROLS, SETTINGS, PAUSED, OVER, EXIT_CONFIRM -> {
             }
             case PLAYING -> updatePlaying();
             case SLOW_MO -> updateSlowMo();
@@ -419,6 +420,7 @@ public class GamePanel extends JPanel
                     mouseX, mouseY);
             case CONTROLS -> GameRenderer.drawControls(g, pulse, mouseX, mouseY);
             case SETTINGS -> GameRenderer.drawSettings(g, bgmOn, sfxOn, pulse, mouseX, mouseY);
+            case EXIT_CONFIRM -> GameRenderer.drawExitConfirm(g, exitCursor, mouseX, mouseY);
             default -> drawGame(g);
         }
         g.dispose();
@@ -554,6 +556,10 @@ public class GamePanel extends JPanel
             navPause(c);
             return;
         }
+        if (state == GameState.EXIT_CONFIRM) {
+            navExitConfirm(c);
+            return;
+        }
         if (!isCountdownActive()) {
             if (p1 != null)
                 p1.keyPressed(c);
@@ -600,8 +606,30 @@ public class GamePanel extends JPanel
             case 0 -> state = GameState.MAP_SELECT;
             case 1 -> state = GameState.CONTROLS;
             case 2 -> state = GameState.SETTINGS;
-            case 3 -> System.exit(0);
+            case 3 -> confirmExit();
         }
+    }
+
+    public void confirmExit() {
+        prevState = state;
+        exitCursor = 1; // Default to NO for safety
+        state = GameState.EXIT_CONFIRM;
+    }
+
+    private void navExitConfirm(int c) {
+        if (c == KeyEvent.VK_UP || c == KeyEvent.VK_W || c == KeyEvent.VK_LEFT || c == KeyEvent.VK_A)
+            exitCursor = 0;
+        if (c == KeyEvent.VK_DOWN || c == KeyEvent.VK_S || c == KeyEvent.VK_RIGHT || c == KeyEvent.VK_D)
+            exitCursor = 1;
+        if (c == KeyEvent.VK_ENTER || c == KeyEvent.VK_SPACE)
+            selectExit(exitCursor);
+        if (c == KeyEvent.VK_ESCAPE)
+            state = prevState;
+    }
+
+    private void selectExit(int i) {
+        if (i == 0) System.exit(0);
+        else state = prevState;
     }
 
     private void navMap(int c) {
@@ -699,6 +727,8 @@ public class GamePanel extends JPanel
             pauseCursor = GameRenderer.pauseHit(mouseX, mouseY);
         } else if (state == GameState.OVER) {
             resultCursor = GameRenderer.resultHit(mouseX, mouseY);
+        } else if (state == GameState.EXIT_CONFIRM) {
+            exitCursor = GameRenderer.exitHit(mouseX, mouseY);
         }
     }
 
@@ -779,6 +809,13 @@ public class GamePanel extends JPanel
                 int i = GameRenderer.resultHit(mx, my);
                 if (i >= 0)
                     selectResult(i);
+            }
+            case EXIT_CONFIRM -> {
+                int i = GameRenderer.exitHit(mx, my);
+                if (i >= 0) {
+                    exitCursor = i;
+                    selectExit(i);
+                }
             }
         }
     }

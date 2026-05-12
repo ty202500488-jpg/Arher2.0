@@ -10,5 +10,6 @@ public enum GameState {
     SLOW_MO,
     OVER,
     PAUSED,
-    SETTINGS
+    SETTINGS,
+    EXIT_CONFIRM
 }

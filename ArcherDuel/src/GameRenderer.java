@@ -73,6 +73,16 @@ public class GameRenderer {
         return -1;
     }
 
+    static int exitHit(int x, int y) {
+        int bw = 180, bh = 44, gap = 30;
+        int totalW = bw * 2 + gap;
+        int startX = W / 2 - totalW / 2;
+        for (int i = 0; i < 2; i++)
+            if (new Rectangle(startX + i * (bw + gap), H / 2 + 30, bw, bh).contains(x, y))
+                return i;
+        return -1;
+    }
+
     static int mapHit(int x, int y, int n) {
         if (new Rectangle(W / 2 - 380, H / 2 - 50, 80, 44).contains(x, y))
             return 0;
@@ -501,6 +511,26 @@ public class GameRenderer {
         }
 
         txt(g, "↑↓  Navigate     ENTER = Select     ESC = Main Menu", cx, hintY, F11, new Color(120, 110, 80));
+    }
+
+    // ── EXIT CONFIRM ─────────────────────────────────────────────
+    static void drawExitConfirm(Graphics2D g, int cur, int mx, int my) {
+        // Darken background
+        g.setColor(new Color(0, 0, 0, 180));
+        g.fillRect(0, 0, W, H);
+
+        panel(g, W / 2 - 200, H / 2 - 120, 400, 240);
+        txt(g, "QUIT GAME?", W / 2, H / 2 - 60, F36, Color.WHITE);
+        txt(g, "Are you sure you want to leave?", W / 2, H / 2 - 25, F11, new Color(180, 180, 180));
+
+        String[] labels = { "YES, QUIT", "NO, STAY" };
+        int bw = 180, bh = 44, gap = 30;
+        int totalW = bw * 2 + gap;
+        int startX = W / 2 - totalW / 2;
+        for (int i = 0; i < 2; i++) {
+            Rectangle r = new Rectangle(startX + i * (bw + gap), H / 2 + 30, bw, bh);
+            drawBtn(g, r, labels[i], i == cur, r.contains(mx, my));
+        }
     }
 
     // ── MAP HELPERS ───────────────────────────────────────────────

@@ -16,7 +16,7 @@ public class GameWindow extends JFrame {
 
     public GameWindow() {
         setTitle("Archer Duel — 1v1 Local Multiplayer");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         setResizable(false);
 
         // Set frame icon
@@ -34,6 +34,13 @@ public class GameWindow extends JFrame {
 
         gamePanel = new GamePanel();
         add(gamePanel);
+
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent e) {
+                gamePanel.confirmExit();
+            }
+        });
 
         pack();
         setLocationRelativeTo(null); // center on screen
