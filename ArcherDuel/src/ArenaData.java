@@ -98,8 +98,8 @@ public class ArenaData {
             { W / 2 - 310, GY - 280, 130, 20 }, // [3] MOVING-L initial x; range covers gap from [1]
             { W / 2 + 180, GY - 280, 130, 20 }, // [4] MOVING-R symmetric
             { W / 2 - 65, GY - 360, 130, 20 }, // [5] MOVING-C x=635..765 reachable from [3]/[4] vert~80
-            { 50, GY - 270, 150, 20 }, // [6] L-far x=50..200 gap from[1]left=80 same vert
-            { W - 200, GY - 270, 150, 20 }, // [7] R-far x=1200..1350 symmetric
+            { 30, GY - 270, 150, 20 }, // [6] L-far x=30..180
+            { W - 180, GY - 270, 150, 20 }, // [7] R-far x=1220..1370 symmetric
             { W / 2 - 180, GY - 430, 150, 20 }, // [8] L-upper x=520..670 gap from[5]left=70 vert=70
             { W / 2 + 30, GY - 430, 150, 20 }, // [9] R-upper x=730..880 gap from[5]right=70 vert=70
             { W / 2 - 80, GY - 540, 160, 20 }, // [10] top x=620..780 gap from[8]=50 gap from[9]=50 vert=110
@@ -132,9 +132,9 @@ public class ArenaData {
     };
     // Sky Islands: 3 horizontal movers provide dynamic routes between islands
     static final int[][] MOVING_SKY = {
-            { 3, W / 2 - 480, W / 2 - 200, 110, 1 },
-            { 4, W / 2 + 200, W / 2 + 480, 100, 1 },
-            { 5, W / 2 - 180, W / 2 + 50, 90, 1 },
+            { 3, W / 2 - 500, W / 2 - 250, 110, 1 },
+            { 4, W / 2 + 120, W / 2 + 370, 100, 1 },
+            { 5, W / 2 - 150, W / 2 + 20, 90, 1 },
     };
 
     // ── Instance data ──────────────────────────────────────────────

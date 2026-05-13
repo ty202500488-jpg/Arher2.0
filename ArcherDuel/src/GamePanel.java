@@ -106,14 +106,15 @@ public class GamePanel extends JPanel
         Arrow.windY = 0;
         arena = new Arena(selMap);
 
-        // Sky Islands has no ground — spawn players ON the center start platform
+        // Sky Islands: spawn players on the far edge platforms
         if (selMap == MapTheme.SKY_ISLANDS) {
-            // Center island: { W/2-160, GY-60, 320, 22 } → top at GY-60
-            int islandTop = ArenaData.GY - 60;
-            int islandLeft = ArenaData.W / 2 - 160;
+            // Far left island: { 30, GY-270, 150, 20 }
+            // Far right island: { W-180, GY-270, 150, 20 }
+            int islandTop = ArenaData.GY - 270;
             float spawnY = islandTop - Player.H;
-            p1 = new Player(0, islandLeft + 20, spawnY, sprites, arrowPool);
-            p2 = new Player(1, islandLeft + 320 - Player.W - 20, spawnY, sprites, arrowPool);
+            
+            p1 = new Player(0, 30 + 30, spawnY, sprites, arrowPool);
+            p2 = new Player(1, ArenaData.W - 180 + 150 - Player.W - 30, spawnY, sprites, arrowPool);
         } else {
             p1 = new Player(0, 100, Arena.GROUND_Y - Player.H, sprites, arrowPool);
             p2 = new Player(1, GameWindow.WIDTH - 100 - Player.W, Arena.GROUND_Y - Player.H, sprites, arrowPool);
