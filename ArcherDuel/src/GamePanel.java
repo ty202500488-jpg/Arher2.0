@@ -18,13 +18,10 @@ public class GamePanel extends JPanel
     private final ParticlePool particlePool = new ParticlePool();
     private final ArrowPool arrowPool = new ArrowPool();
     private int hazardTimer = 0;
-    private static final int PU_IV = 600;
 
     private static final Font FPS_FONT = new Font("Monospaced", Font.BOLD, 12);
-    private static final Color FLASH_COL = new Color(255, 255, 255);
     
     // Night mask constants
-    private static final float[] NIGHT_GRAD_STEPS = { 0f, 0.55f, 1f };
     private static final Color NIGHT_BASE_OVERLAY = new Color(0, 0, 0, 215);
 
     private GameState state = GameState.LOADING, prevState = GameState.PLAYING, subReturnState = GameState.MAIN_MENU;
@@ -51,7 +48,7 @@ public class GamePanel extends JPanel
     // Match
     private int winner = 0, roundsP1 = 0, roundsP2 = 0;
     private static final int WIN_ROUNDS = 2;
-    private int countdownTick = 0, matchTick = 0, shrinkLevel = 0, gameTick = 0;
+    private int countdownTick = 0, gameTick = 0;
     private int flashAlpha = 0;
 
     // Performance monitoring
@@ -135,8 +132,6 @@ public class GamePanel extends JPanel
         winner = 0;
         flashAlpha = 0;
         countdownTick = 0;
-        matchTick = 0;
-        shrinkLevel = 0;
         slowMoTick = 0;
         gameTick = 0;
     }
@@ -212,7 +207,6 @@ public class GamePanel extends JPanel
     }
 
     private void updatePlaying() {
-        matchTick++;
         gameTick++;
         if (shakeTick > 0)
             shakeTick--;
@@ -829,6 +823,8 @@ public class GamePanel extends JPanel
                     exitCursor = i;
                     selectExit(i);
                 }
+            }
+            case PLAYING, SLOW_MO -> {
             }
         }
     }

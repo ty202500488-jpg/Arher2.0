@@ -1,6 +1,4 @@
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
 /**
@@ -22,7 +20,6 @@ public class MapHazard {
     public Type type;
     public boolean active = true;
     public int lifetime = 0; // ticks alive
-    private final Random rng = new Random();
     private final Rectangle bounds = new Rectangle();
 
     // ── Static Color constants (avoid per-frame allocation) ────────

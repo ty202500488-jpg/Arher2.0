@@ -271,7 +271,7 @@ public class Player {
         float dy = -1.5f - (ch * 2f);
         
         // Obtain from pool
-        Arrow a = arrowPool.obtain(x + W/2, y + H/3, dx, dy, playerIndex, ch);
+        Arrow a = arrowPool.obtain(x + W/2, y + H/3, dx, dy, playerIndex);
         arrows.add(a);
         
         charging = false;

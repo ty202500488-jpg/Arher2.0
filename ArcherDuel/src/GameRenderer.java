@@ -133,7 +133,7 @@ public class GameRenderer {
     }
 
     static int mapHit(int x, int y, int n) {
-        int cx = W / 2, py = 80, pw = 640, ph = 370;
+        int cx = W / 2, py = 80, ph = 370;
         // Arrows
         REUSABLE_RECT.setBounds(cx - 380, py + ph / 2 - 22, 80, 44);
         if (REUSABLE_RECT.contains(x, y))
@@ -368,7 +368,6 @@ public class GameRenderer {
         txt(g, m.description, cx, py + ph - 18, F11, CTRL_TEXT);
         // Nav arrows
         REUSABLE_RECT.setBounds(cx - 380, py + ph / 2 - 22, 80, 44);
-        Rectangle lBtn = REUSABLE_RECT; // Careful: reusable rect
         // Actually, drawBtn takes a Rectangle. I should probably just pass the bounds.
         // But drawBtn uses r.x, r.y etc.
         // Let's use a local Rectangle for buttons if they are used for drawing too, or just drawBtn with bounds.
@@ -524,7 +523,6 @@ public class GameRenderer {
         int winY   = H / 2 - 140;  // winner text
         int scoreY = winY + 52;    // score line
         int divY   = scoreY + 20;  // thin divider
-        int btn0Y  = divY + 40;    // first button
         int hintY  = H - 22;
 
         // Winner colour

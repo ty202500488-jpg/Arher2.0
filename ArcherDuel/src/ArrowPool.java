@@ -12,16 +12,16 @@ public class ArrowPool {
         }
     }
 
-    public Arrow obtain(float x, float y, float dx, float dy, int owner, float ch) {
+    public Arrow obtain(float x, float y, float dx, float dy, int owner) {
         for (Arrow a : pool) {
             if (!a.active) {
-                a.reset(x, y, dx, dy, owner, ch);
+                a.reset(x, y, dx, dy, owner);
                 return a;
             }
         }
         // Expand if needed
         Arrow a = new Arrow();
-        a.reset(x, y, dx, dy, owner, ch);
+        a.reset(x, y, dx, dy, owner);
         pool.add(a);
         return a;
     }

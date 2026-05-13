@@ -22,17 +22,15 @@ public class Arrow {
     public boolean isHeadshot = false; 
 
     private final Rectangle bounds = new Rectangle();
-    private float charge;
     
     public Arrow() {}
 
-    public void reset(float x, float y, float dx, float dy, int owner, float ch) {
+    public void reset(float x, float y, float dx, float dy, int owner) {
         this.x = x;
         this.y = y;
         this.dx = dx;
         this.dy = dy;
         this.ownerIndex = owner;
-        this.charge = ch;
         this.active = true;
         this.isHeadshot = false;
         this.trailHead = 0;

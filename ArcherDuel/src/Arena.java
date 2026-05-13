@@ -1,5 +1,4 @@
 import java.awt.*;
-import java.awt.geom.*;
 import java.awt.image.BufferedImage;
 import java.util.Random;
 
@@ -28,12 +27,8 @@ public class Arena {
     private static final Color FC_TREE_FAR = new Color(8, 16, 10, 170);
     private static final Color FC_TREE_D   = new Color(10, 22, 13);
     private static final Color FC_TREE_M   = new Color(14, 32, 16);
-    private static final Color FC_FOG0     = new Color(12, 28, 14, 0);
-    private static final Color FC_FOG1     = new Color(8, 20, 10, 200);
     private static final Color FC_PLAT_S   = new Color(58, 53, 46);
     private static final Color FC_PLAT_M   = new Color(38, 115, 32);
-    private static final Color FC_AMB_G    = new Color(160, 255, 80, 45);
-    private static final Color FC_AMB_C    = new Color(200, 255, 120, 210);
     // CASTLE
     private static final Color CC_BG1      = new Color(15, 12, 28);
     private static final Color CC_BG2      = new Color(38, 32, 58);
@@ -118,11 +113,7 @@ public class Arena {
     private static final Color PLT_SHADOW  = new Color(0, 0, 0, 50);
     private static final Color VINE_GRN    = new Color(22, 70, 22);
     private static final Color VINE_LEAF   = new Color(30, 90, 25, 160);
-    private static final Color BAN_POLE    = new Color(100, 90, 120);
-    private static final Color BAN_P1      = new Color(200, 60, 60);
-    private static final Color BAN_P2      = new Color(60, 100, 200);
     private static final BasicStroke STROKE2 = new BasicStroke(2, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
-    private static final BasicStroke STROKE3 = new BasicStroke(3);
     private static final BasicStroke STROKE1 = new BasicStroke(1);
 
 
@@ -481,15 +472,6 @@ public class Arena {
         g.fillRect(bx - 1, by - 10, 24, 4);
     }
 
-    private void drawBanner(Graphics2D g, int bx, int by, int col) {
-        g.setColor(BAN_POLE);
-        g.fillRect(bx, by, 5, 60);
-        Color fc = col == 0 ? BAN_P1 : BAN_P2;
-        g.setColor(fc);
-        int[] px = { bx + 5, bx + 40, bx + 5 };
-        int[] py = { by, by + 15, by + 30 };
-        g.fillPolygon(px, py, 3);
-    }
 
     private void drawTorches(Graphics2D g) {
         long t = System.currentTimeMillis();
@@ -546,18 +528,6 @@ public class Arena {
         }
     }
 
-    private void drawRays(Graphics2D g) {
-        int[] cxs = { W() / 2 + 60, W() / 2 - 200, 400, W() - 400 };
-        int[] bw = { 220, 140, 100, 110 };
-        int[] al = { 14, 10, 8, 9 };
-        for (int i = 0; i < cxs.length; i++) {
-            int hw = bw[i] / 2;
-            g.setColor(new Color(180, 255, 160, al[i]));
-            int[] bx = { cxs[i] - 15, cxs[i] + 15, cxs[i] + hw, cxs[i] - hw };
-            int[] by = { 0, 0, GROUND_Y, GROUND_Y };
-            g.fillPolygon(bx, by, 4);
-        }
-    }
 
     private void drawCloud(Graphics2D g, int cx, int cy) {
         g.fillOval(cx, cy + 10, 60, 40);
