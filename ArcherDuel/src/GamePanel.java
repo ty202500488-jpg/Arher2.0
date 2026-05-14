@@ -77,8 +77,7 @@ public class GamePanel extends JPanel
     // Mouse
     private int mouseX = -1, mouseY = -1;
 
-    // BG particles
-    private final float[][] bgPts = new float[80][4];
+    // BG state
     private float pulse = 0.3f;
     private boolean pulseUp = true;
     private final Random rng = new Random();
@@ -92,12 +91,6 @@ public class GamePanel extends JPanel
         addKeyListener(this);
         addMouseListener(this);
         addMouseMotionListener(this);
-        for (float[] p : bgPts) {
-            p[0] = rng.nextFloat() * GameWindow.WIDTH;
-            p[1] = rng.nextFloat() * GameWindow.HEIGHT;
-            p[2] = (rng.nextFloat() - 0.5f) * 0.8f;
-            p[3] = (rng.nextFloat() - 0.5f) * 0.5f;
-        }
         timer = new Timer(TICK_MS, this);
         timer.start();
         if (bgmOn)
@@ -173,7 +166,6 @@ public class GamePanel extends JPanel
 
     private void update() {
         updatePulse();
-        updateBg();
         switch (state) {
             case LOADING -> {
                 loadTick++;
@@ -196,20 +188,6 @@ public class GamePanel extends JPanel
             pulseUp = true;
     }
 
-    private void updateBg() {
-        for (float[] p : bgPts) {
-            p[0] += p[2];
-            p[1] += p[3];
-            if (p[0] < 0)
-                p[0] = GameWindow.WIDTH;
-            if (p[0] > GameWindow.WIDTH)
-                p[0] = 0;
-            if (p[1] < 0)
-                p[1] = GameWindow.HEIGHT;
-            if (p[1] > GameWindow.HEIGHT)
-                p[1] = 0;
-        }
-    }
 
     /**
      * Updates the game state while a match is in progress.
@@ -411,8 +389,8 @@ public class GamePanel extends JPanel
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         switch (state) {
-            case LOADING -> GameRenderer.drawLoading(g, loadTick, LOAD_DUR, bgPts, mouseX, mouseY);
-            case MAIN_MENU -> GameRenderer.drawMainMenu(g, menuCursor, pulse, bgPts, mouseX, mouseY);
+            case LOADING -> GameRenderer.drawLoading(g, loadTick, LOAD_DUR, mouseX, mouseY);
+            case MAIN_MENU -> GameRenderer.drawMainMenu(g, menuCursor, pulse, mouseX, mouseY);
             case MAP_SELECT -> GameRenderer.drawMapSelect(g, mapCursor, MapTheme.values(), pulse, mapTrans, mapTransDir,
                     mouseX, mouseY);
             case CONTROLS -> GameRenderer.drawControls(g, pulse, mouseX, mouseY);

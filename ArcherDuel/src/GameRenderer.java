@@ -24,9 +24,6 @@ public class GameRenderer {
             BTN_FC_H = new Color(255, 235, 160),
             BTN_FC_N = new Color(200, 175, 110),
             BTN_GLOW = new Color(230, 185, 55, 70),
-            STAR_W = new Color(255, 255, 255),
-            STAR_G = new Color(255, 230, 160),
-            STAR_B = new Color(200, 220, 255),
             TEXT_SUB = new Color(210, 175, 100),
             DIVIDER = new Color(200, 155, 50, 120),
             BAR_BG = new Color(40, 30, 12),
@@ -211,16 +208,6 @@ public class GameRenderer {
         g.fillRect(0, 0, W, H);
     }
 
-    static void bgPts(Graphics2D g, float[][] pts, int al) {
-        for (float[] p : pts) {
-            int idx = (int) (p[0] + p[1]) % 3;
-            Color base = idx == 0 ? STAR_G : idx == 1 ? STAR_W : STAR_B;
-            g.setColor(new Color(base.getRed(), base.getGreen(), base.getBlue(), al));
-            int sz = (int) (p[0] * 31 + p[1]) % 3 == 0 ? 3 : 2;
-            g.fillOval((int) p[0], (int) p[1], sz, sz);
-        }
-    }
-
     static void drawParticles(Graphics2D g, List<Particle> ps) {
         for (var p : ps) {
             if (!p.active)
@@ -232,10 +219,9 @@ public class GameRenderer {
     }
 
     // ── LOADING ───────────────────────────────────────────────────
-    static void drawLoading(Graphics2D g, int tick, int max, float[][] pts, int mx, int my) {
+    static void drawLoading(Graphics2D g, int tick, int max, int mx, int my) {
         // Brighter, warmer background
         bg(g, new Color(28, 20, 50), new Color(55, 30, 15));
-        bgPts(g, pts, 60);
         long t = System.currentTimeMillis();
 
         // ── Layout anchors ──
@@ -297,9 +283,8 @@ public class GameRenderer {
     }
 
     // ── MAIN MENU ─────────────────────────────────────────────────
-    static void drawMainMenu(Graphics2D g, int cur, float pulse, float[][] pts, int mx, int my) {
+    static void drawMainMenu(Graphics2D g, int cur, float pulse, int mx, int my) {
         bg(g, new Color(10, 20, 14), new Color(22, 40, 22));
-        bgPts(g, pts, 50);
 
         // ── Trees (decorative background) ──
         g.setColor(new Color(10, 22, 12));
@@ -495,7 +480,7 @@ public class GameRenderer {
         int hintY = H - 22;
 
         // Winner colour
-        Color wc = win == 1 ? STAR_B : HUD_RED;
+        Color wc = win == 1 ? HUD_BLUE : HUD_RED;
 
         // Winner text (large, spaced)
         txtSpaced(g, wt.toUpperCase(), cx, winY, F72, wc, 4);

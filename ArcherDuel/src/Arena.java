@@ -33,7 +33,6 @@ public class Arena {
     // CASTLE
     private static final Color CC_BG1      = new Color(15, 12, 28);
     private static final Color CC_BG2      = new Color(38, 32, 58);
-    private static final Color CC_STAR     = new Color(255, 255, 255, 160);
     private static final Color CC_MOON1    = new Color(232, 232, 202);
     private static final Color CC_MOON2    = new Color(15, 12, 28);
     private static final Color CC_MOON_G   = new Color(255, 255, 200, 14);
@@ -42,8 +41,6 @@ public class Arena {
     private static final Color CC_MIST1    = new Color(18, 12, 38, 180);
     private static final Color CC_PLAT_S   = new Color(75, 70, 90);
     private static final Color CC_PLAT_M   = new Color(50, 45, 70);
-    private static final Color CC_AMB_G    = new Color(180, 160, 255, 32);
-    private static final Color CC_AMB_C    = new Color(200, 190, 255, 185);
     private static final Color CC_STONE    = new Color(42, 38, 62);
     private static final Color CC_STONELT  = new Color(55, 50, 78);
     private static final Color CC_CREN     = new Color(38, 34, 56);
@@ -63,12 +60,9 @@ public class Arena {
     private static final Color VC_HAZ      = new Color(255, 50, 0, 40);
     private static final Color VC_PLAT_S   = new Color(92, 46, 36);
     private static final Color VC_PLAT_M   = new Color(162, 72, 26);
-    private static final Color VC_AMB_G    = new Color(255, 140, 0, 42);
-    private static final Color VC_AMB_C    = new Color(255, 200, 50, 205);
     // ICE
     private static final Color IC_BG1      = new Color(145, 198, 228);
     private static final Color IC_BG2      = new Color(58, 108, 158);
-    private static final Color IC_SNOW     = new Color(255, 255, 255, 65);
     private static final Color IC_STLCT    = new Color(185, 225, 255, 190);
     private static final Color IC_TINT     = new Color(175, 215, 245, 28);
     private static final Color IC_SHIM0    = new Color(205, 238, 255, 0);
@@ -76,8 +70,6 @@ public class Arena {
     private static final Color IC_PLAT_S   = new Color(158, 212, 242);
     private static final Color IC_PLAT_M   = new Color(202, 237, 255);
     private static final Color IC_TOP      = new Color(255, 255, 255, 60);
-    private static final Color IC_AMB_G    = new Color(200, 230, 255, 32);
-    private static final Color IC_AMB_C    = new Color(240, 250, 255, 205);
     // SKY
     private static final Color SK_BG1      = new Color(90, 130, 220);
     private static final Color SK_BG2      = new Color(230, 170, 120);
@@ -86,10 +78,6 @@ public class Arena {
     private static final Color SK_GRASS_MV = new Color(100, 200, 60);
     private static final Color SK_GRASS_ST = new Color(60, 160, 50);
     private static final Color SK_SHADOW   = new Color(0, 0, 0, 40);
-    private static final Color SK_DEATH0   = new Color(0, 0, 0, 0);
-    private static final Color SK_DEATH1   = new Color(0, 0, 0, 140);
-    private static final Color SK_AMB_G    = new Color(255, 240, 180, 30);
-    private static final Color SK_AMB_C    = new Color(255, 255, 220, 200);
     private static final Font  SK_FONT     = new java.awt.Font("Monospaced", java.awt.Font.BOLD, 14);
     // Shared / decorations
     private static final Color PLT_HILITE  = new Color(255, 255, 255, 90);
@@ -176,10 +164,6 @@ public class Arena {
     // ── CASTLE ────────────────────────────────────────────────────
     private void drawCastle(Graphics2D g) {
         grad(g, CC_BG1, CC_BG2);
-        // Stars
-        long ts = System.currentTimeMillis();
-        g.setColor(CC_STAR);
-        for (int[] p : pts) { float tw = (float)(Math.sin(ts/800.0+p[2])*0.5+0.5); if (tw>0.3f) g.fillOval(p[0], p[1]%260, 2, 2); }
         // Moon
         g.setColor(CC_MOON1); g.fillOval(W()-165, 22, 92, 92);
         g.setColor(CC_MOON2);    g.fillOval(W()-135, 12, 92, 92);
@@ -196,7 +180,6 @@ public class Arena {
         g.setPaint(new GradientPaint(0, GROUND_Y-70, CC_MIST0, 0, GROUND_Y, CC_MIST1));
         g.fillRect(0, GROUND_Y-70, W(), 70); g.setPaint(null);
         drawAllPlatforms(g, CC_PLAT_S, CC_PLAT_M, false);
-        drawAmb(g, CC_AMB_G, CC_AMB_C);
     }
 
     // ── VOLCANO ───────────────────────────────────────────────────
@@ -223,20 +206,11 @@ public class Arena {
         g.fillRect(615, GROUND_Y-12, 205, 12);
         g.fillRect(1015, GROUND_Y-12, 165, 12);
         drawAllPlatforms(g, VC_PLAT_S, VC_PLAT_M, false);
-        drawAmb(g, VC_AMB_G, VC_AMB_C);
     }
 
     // ── ICE ───────────────────────────────────────────────────────
     private void drawIce(Graphics2D g) {
         grad(g, IC_BG1, IC_BG2);
-        // Snowfall
-        long t = System.currentTimeMillis();
-        g.setColor(IC_SNOW);
-        for (int[] p : pts) {
-            int px = (int)(p[0] + Math.sin(t/900.0+p[2])*18) % W();
-            int py = (int)((p[1] + (t/18 + p[2]*4)) % GROUND_Y);
-            if (py > 0) { int sz=1+(p[2]%3); g.fillOval(px, py, sz+1, sz+1); }
-        }
         // Ice stalactites
         g.setColor(IC_STLCT);
         for (int x = 35; x < W(); x += 62) {
@@ -252,7 +226,6 @@ public class Arena {
         // Ice shimmer strips on platform tops
         g.setColor(IC_TOP);
         for (Rectangle r : data.platforms) g.fillRect(r.x+2, r.y, r.width-4, 3);
-        drawAmb(g, IC_AMB_G, IC_AMB_C);
     }
 
     // ── SKY ISLANDS ───────────────────────────────────────────────
@@ -288,9 +261,7 @@ public class Arena {
             }
         }
         // Death zone indicator
-        g.setPaint(new GradientPaint(0, HEIGHT - 50, SK_DEATH0, 0, HEIGHT, SK_DEATH1));
         g.fillRect(0, HEIGHT - 50, W(), 50);
-        drawAmb(g, SK_AMB_G, SK_AMB_C);
         return;
     }
 
@@ -439,29 +410,6 @@ public class Arena {
         for (int x : new int[] { 100, 280, 450, 650, 820, 1000, 1180, 1320 }) {
             g.fillRect(x, GROUND_Y - 350, 18, 360);
             g.fillOval(x - 50, GROUND_Y - 420, 120, 180);
-        }
-    }
-
-
-
-    private void drawAmb(Graphics2D g, Color glow, Color core) {
-        long t = System.currentTimeMillis();
-        for (int[] p : pts) {
-            double ph = Math.sin(t / 700.0 + p[2] * 0.05);
-            float al = (float) (ph * 0.5 + 0.5);
-            if (al < 0.12f)
-                continue;
-            int dx = (int) (Math.sin(t / 1200.0 + p[2]) * 6);
-            int dy = (int) (Math.cos(t / 900.0 + p[2]) * 4);
-            int px = p[0] + dx, py = p[1] + dy;
-            if (py <= 0 || py >= GROUND_Y)
-                continue;
-            g.setColor(new Color(glow.getRed(), glow.getGreen(), glow.getBlue(),
-                    (int) (al * glow.getAlpha() / 255f * 40)));
-            g.fillOval(px - 4, py - 4, 10, 10);
-            g.setColor(new Color(core.getRed(), core.getGreen(), core.getBlue(),
-                    (int) (al * core.getAlpha() / 255f * 220)));
-            g.fillOval(px, py, 4, 4);
         }
     }
 
