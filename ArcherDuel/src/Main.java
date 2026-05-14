@@ -1,6 +1,6 @@
-/**
- * Entry point for the ArcherDuel application.
- * Initializes system properties and launches the game window.
+/*
+ Entry point for the ArcherDuel application.
+
  */
 public class Main {
     public static void main(String[] args) {
