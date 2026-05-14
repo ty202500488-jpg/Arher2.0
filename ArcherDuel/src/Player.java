@@ -10,29 +10,57 @@ import java.util.List;
  * P2: Arrows=Move UP=Jump RIGHT_CTRL=Shoot RIGHT_SHIFT=Dash
  * (Right CTRL/SHIFT injected from GamePanel via setFirePressed/setDashPressed)
  */
+/**
+ * Represents a player in the game. Handles input, physics, animations, and combat.
+ */
 public class Player {
-    public static final int W = 42, H = 63, MAX_HP = 3, I_FRAMES = 40;
-    private static final float BASE_SPD = 4.2f, JUMP_POW = -13f, GRAV = 0.52f, MAX_FALL = 15f;
-    private static final int DASH_DUR = 12, DASH_CD = 50, SHOOT_CD = 30, MAX_CHARGE = 40;
-    private static final float DASH_SPD = 12f;
+    // ── Dimensional Constants ─────────────────────────────────────────
+    public static final int W = 42, H = 63;      // Player hitbox dimensions
+    public static final int MAX_HP = 3;          // Total health points
+    public static final int I_FRAMES = 40;       // Duration of invincibility after getting hit
 
-    public final int playerIndex;
-    public float x, y;
-    private float vy = 0;
-    public boolean onGround = false, alive = true, rageMode = false;
-    public int hp = MAX_HP, shakeRequest = 0;
-    public int arrowsFired = 0, arrowsHit = 0, headshots = 0;
+    // ── Physics Constants ─────────────────────────────────────────────
+    private static final float BASE_SPD = 4.2f;  // Normal walking speed
+    private static final float JUMP_POW = -13f;  // Initial vertical velocity for jumps
+    private static final float GRAV     = 0.52f; // Gravity force applied per tick
+    private static final float MAX_FALL = 15f;   // Terminal velocity to prevent falling too fast
+    
+    // ── Ability Constants ─────────────────────────────────────────────
+    private static final int DASH_DUR = 12;      // How many ticks a dash lasts
+    private static final int DASH_CD  = 50;      // Ticks before dash can be used again
+    private static final int SHOOT_CD = 30;      // Delay between firing arrows
+    private static final int MAX_CHARGE = 40;    // Ticks required to reach maximum shot power
+    private static final float DASH_SPD = 12f;   // Horizontal velocity during a dash
 
-    private boolean facingRight;
-    private int shootCD = 0, shootAnim = 0, iFrames = 0;
-    private int dashTimer = 0, dashCD = 0;
-    private float dashDX = 0;
+    // ── Basic State ──────────────────────────────────────────────────
+    public final int playerIndex;     // 0 for Player 1, 1 for Player 2
+    public float x, y;               // Current world position
+    private float vy = 0;            // Current vertical velocity
+    public boolean onGround = false;  // Whether the player is touching a platform
+    public boolean alive = true;      // Whether the player is still in the match
+    public boolean rageMode = false;  // Visual effect when health is low
+    public int hp = MAX_HP;           // Current health
+    public int shakeRequest = 0;      // Screen shake trigger on hit
+
+    // ── Statistics ────────────────────────────────────────────────────
+    public int arrowsFired = 0;
+    public int arrowsHit = 0;
+    public int headshots = 0;
+
+    // ── Movement & Action State ───────────────────────────────────────
+    private boolean facingRight;      // Direction for sprite flipping and shooting
+    private int shootCD = 0;          // Ticks remaining until next shot
+    private int shootAnim = 0;        // Ticks remaining for the "shooting" animation frame
+    private int iFrames = 0;          // Ticks remaining for invincibility
+    private int dashTimer = 0;        // Ticks remaining in current dash
+    private int dashCD = 0;           // Ticks remaining until next dash
+    private float dashDX = 0;         // Velocity applied during dash
     private boolean isDashing = false;
-    private boolean charging = false;
-    private int chargeTicks = 0;
-    private float speedMult = 1f;
-    private boolean iceMode = false;
-    private float iceVX = 0;
+    private boolean charging = false;  // Whether the player is currently holding the fire button
+    private int chargeTicks = 0;      // How long the shot has been held
+    private float speedMult = 1f;     // Speed modifier (for power-ups)
+    private boolean iceMode = false;  // Frictionless movement flag
+    private float iceVX = 0;          // Current sliding velocity on ice
 
     // External fire/dash injection (for RIGHT_CTRL, RIGHT_SHIFT)
     private boolean extFirePressed = false, extDashPressed = false;
@@ -127,12 +155,11 @@ public class Player {
     }
 
     /**
-     * Countdown-phase update: applies gravity and platform snapping only.
-     * No movement, jump, dash, or shooting input is read.
+     * Logic for the pre-game countdown phase.
+     * Players can fall and snap to platforms but cannot move or shoot.
      */
     public void updateGravityOnly(Rectangle[] plats) {
-        if (iFrames > 0)
-            iFrames--;
+        if (iFrames > 0) iFrames--;
         if (!alive) {
             anim.tick();
             return;
@@ -140,12 +167,15 @@ public class Player {
         if (downPressTimer > 0) downPressTimer--;
         if (dropThroughTimer > 0) dropThroughTimer--;
 
+        // Apply standard gravity
         vy = Math.min(vy + GRAV, MAX_FALL);
         y += vy;
+        
+        // Collision check
         onGround = false;
         footBox.setBounds((int) x, (int) y + H - 4, W, 8);
         for (Rectangle r : plats) {
-            if (dropThroughTimer > 0 && r.height < 50) continue;
+            if (dropThroughTimer > 0 && r.height < 50) continue; // Allow dropping through thin platforms
             if (footBox.intersects(r) && vy >= 0) {
                 y = r.y - H;
                 vy = 0;
@@ -153,36 +183,49 @@ public class Player {
                 break;
             }
         }
+        
+        // Screen bounds
         x = Math.max(0, Math.min(x, GameWindow.WIDTH - W));
+        
         anim.setAnimation(SpriteRenderer.ANIM_IDLE);
         anim.tick();
+        
+        // Arrows from previous round might still be flying
         arrows.forEach(Arrow::update);
         arrows.removeIf(a -> !a.active);
     }
 
+    /**
+     * Main update loop for the player.
+     * Processes input, movement, combat, and animation states.
+     */
     public void update(Rectangle[] plats) {
         if (downPressTimer > 0) downPressTimer--;
         if (dropThroughTimer > 0) dropThroughTimer--;
 
-        if (iFrames > 0)
-            iFrames--;
+        if (iFrames > 0) iFrames--;
+        
         if (!alive) {
             anim.tick();
             arrows.forEach(Arrow::update);
             arrows.removeIf(a -> !a.active);
             return;
         }
-        updateDash();
-        updateMove(plats);
-        updateCharge();
-        if (shootCD > 0)
-            shootCD--;
-        if (shootAnim > 0)
-            shootAnim--;
-        updateAnim();
+
+        updateDash();     // Handle dash ability
+        updateMove(plats); // Handle walking, jumping, and platform collision
+        updateCharge();   // Handle arrow charging logic
+        
+        if (shootCD > 0) shootCD--;
+        if (shootAnim > 0) shootAnim--;
+        
+        updateAnim();     // Determine which animation to play
+        
+        // Update projectiles owned by this player
         arrows.forEach(Arrow::update);
         arrows.removeIf(a -> !a.active);
-        anim.tick();
+        
+        anim.tick();      // Advance animation frame
     }
 
     private void updateDash() {
@@ -263,22 +306,34 @@ public class Player {
         }
     }
 
+    /**
+     * Finalizes and fires an arrow.
+     * Speed and trajectory are calculated based on the charge time.
+     */
     private void releaseShot() {
         if (!alive) return;
+        
+        // Calculate shot power (0.0 to 1.0)
         float ch = Math.min(1.0f, chargeTicks / (float)MAX_CHARGE);
+        
+        // Interpolate speed between base and max based on charge
         float s = Arrow.BASE_SPEED + (Arrow.MAX_SPEED - Arrow.BASE_SPEED) * ch;
         float dx = facingRight ? s : -s;
+        
+        // Slight upward arc for all shots to make them feel more natural
         float dy = -1.5f - (ch * 2f);
         
-        // Obtain from pool
+        // Obtain an arrow from the global object pool to save memory
         Arrow a = arrowPool.obtain(x + W/2, y + H/3, dx, dy, playerIndex);
         arrows.add(a);
         
+        // Reset charging state
         charging = false;
         chargeTicks = 0;
         shootCD = SHOOT_CD;
-        shootAnim = 15;
+        shootAnim = 15; // Show shooting pose for 15 ticks
         arrowsFired++;
+        
         AudioManager.play(AudioManager.Sound.SHOOT);
     }
 

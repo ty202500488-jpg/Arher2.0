@@ -4,13 +4,15 @@ import java.io.File;
 import javax.imageio.ImageIO;
 
 /**
- * GameWindow
- * Sets up the main JFrame and hosts the GamePanel.
+ * The main application window (JFrame).
+ * Configures the window properties, sets the application icon, 
+ * and hosts the primary GamePanel where the game is drawn.
  */
 public class GameWindow extends JFrame {
 
-    public static final int WIDTH = 1400;
-    public static final int HEIGHT = 800;
+    // ── Window Dimensions ────────────────────────────────────────────
+    public static final int WIDTH = 1400; // Total window width
+    public static final int HEIGHT = 800; // Total window height
 
     private GamePanel gamePanel;
 
@@ -35,6 +37,7 @@ public class GameWindow extends JFrame {
         gamePanel = new GamePanel();
         add(gamePanel);
 
+        // Custom exit handler to show a confirmation dialog
         addWindowListener(new java.awt.event.WindowAdapter() {
             @Override
             public void windowClosing(java.awt.event.WindowEvent e) {
@@ -42,7 +45,7 @@ public class GameWindow extends JFrame {
             }
         });
 
-        pack();
-        setLocationRelativeTo(null); // center on screen
+        pack(); // Resize window to fit the preferred size of GamePanel
+        setLocationRelativeTo(null); // Center the window on the screen
     }
 }

@@ -1,6 +1,10 @@
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Manages the lifecycle of arrow projectiles using an object pool.
+ * Reuses inactive arrows to reduce garbage collection overhead.
+ */
 public class ArrowPool {
     private final List<Arrow> pool;
     private static final int INITIAL_SIZE = 50;
@@ -12,6 +16,10 @@ public class ArrowPool {
         }
     }
 
+    /**
+     * Retrieves an arrow from the pool, resetting it with the given parameters.
+     * If no inactive arrows are available, creates a new one.
+     */
     public Arrow obtain(float x, float y, float dx, float dy, int owner) {
         for (Arrow a : pool) {
             if (!a.active) {

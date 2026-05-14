@@ -3,8 +3,9 @@ import java.awt.image.BufferedImage;
 import java.util.Random;
 
 /**
- * Arena v4 — delegates data/physics to ArenaData, owns all rendering.
- * Each map has a fully unique visual theme.
+ * The Arena class handles all visual rendering for the game's levels.
+ * It uses a "Theme" system to draw completely different backgrounds and platform styles.
+ * High-performance rendering is achieved by caching static background elements.
  */
 public class Arena {
 
@@ -151,7 +152,9 @@ public class Arena {
         return data.getRightWall();
     }
 
-    // ── Draw dispatcher ───────────────────────────────────────────
+    /**
+     * Primary render method that delegates drawing to the specific theme handler.
+     */
     public void draw(Graphics2D g) {
         switch (data.theme) {
             case FOREST -> drawForest(g);

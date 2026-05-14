@@ -6,25 +6,34 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * The main game controller and view.
+ * Handles the game loop, input events, collision detection, and state transitions.
+ * Implements standard Swing listeners for keyboard and mouse interaction.
+ */
 public class GamePanel extends JPanel
         implements KeyListener, ActionListener, MouseListener, MouseMotionListener {
 
-    private static final int TICK_MS = 1000 / 60;
+    private static final int TICK_MS = 1000 / 60; // Target 60 FPS for the logic loop
 
-    private Arena arena;
-    private Player p1, p2;
-    private final SpriteRenderer sprites = new SpriteRenderer();
-    private final List<MapHazard> hazards = new ArrayList<>();
-    private final ParticlePool particlePool = new ParticlePool();
-    private final ArrowPool arrowPool = new ArrowPool();
-    private int hazardTimer = 0;
+    // ── Game Entities & Systems ───────────────────────────────────────
+    private Arena arena;                    // The current level/map
+    private Player p1, p2;                  // The two archers
+    private final SpriteRenderer sprites = new SpriteRenderer(); // Generates/caches pixel-art frames
+    private final List<MapHazard> hazards = new ArrayList<>();   // Active hazards like fireballs/lava
+    private final ParticlePool particlePool = new ParticlePool(); // Recycled particle effects
+    private final ArrowPool arrowPool = new ArrowPool();       // Recycled arrow objects
+    private int hazardTimer = 0;            // Tracks when to spawn next random hazard
 
     private static final Font FPS_FONT = new Font("Monospaced", Font.BOLD, 12);
     
-    // Night mask constants
+    // ── Visual Overlay Constants ──────────────────────────────────────
     private static final Color NIGHT_BASE_OVERLAY = new Color(0, 0, 0, 215);
 
-    private GameState state = GameState.LOADING, prevState = GameState.PLAYING, subReturnState = GameState.MAIN_MENU;
+    // ── Game State Management ─────────────────────────────────────────
+    private GameState state = GameState.LOADING; 
+    private GameState prevState = GameState.PLAYING;
+    private GameState subReturnState = GameState.MAIN_MENU; // Used for returning from sub-menus (Settings/Controls)
 
     // Loading
     private int loadTick = 0;
@@ -46,21 +55,27 @@ public class GamePanel extends JPanel
     public static boolean bgmOn = true, sfxOn = true;
 
     // Match
-    private int winner = 0, roundsP1 = 0, roundsP2 = 0;
-    private static final int WIN_ROUNDS = 2;
-    private int countdownTick = 0, gameTick = 0;
-    private int flashAlpha = 0;
+    // ── Match & Score State ──────────────────────────────────────────
+    private int winner = 0;                 // 1 for P1, 2 for P2
+    private int roundsP1 = 0, roundsP2 = 0; // Win counter for the current match
+    private static final int WIN_ROUNDS = 2; // Rounds needed to win the match
+    private int countdownTick = 0;          // Ticks for the pre-round countdown (3, 2, 1, FIGHT!)
+    private int gameTick = 0;               // Total ticks since match start
+    private int flashAlpha = 0;             // Screen flash intensity (e.g., on death)
 
-    // Performance monitoring
+    // ── Performance & FX State ────────────────────────────────────────
     private int fps = 0;
     private int frameCount = 0;
     private long lastFpsTime = 0;
     private String winTxt = "";
-    private int slowMoTick = 0;
-    private float slowMoRatio = 0;
-    private static final int SLOW_DUR = 90;
-    private int shakeTick = 0, shakeAmt = 0;
-    private int p1F = 0, p1H = 0, p1S = 0, p2F = 0, p2H = 0, p2S = 0;
+    private int slowMoTick = 0;             // Ticks remaining in slow-motion death effect
+    private float slowMoRatio = 0;          // Interpolation factor for slow-mo effects
+    private static final int SLOW_DUR = 90; 
+    private int shakeTick = 0, shakeAmt = 0; // Screen shake state
+
+    // Cached statistics for the result screen
+    private int p1F = 0, p1H = 0, p1S = 0;  // P1: Fired, Hits, Headshots
+    private int p2F = 0, p2H = 0, p2S = 0;  // P2: Fired, Hits, Headshots
 
     // Mouse
     private int mouseX = -1, mouseY = -1;
@@ -207,52 +222,55 @@ public class GamePanel extends JPanel
         }
     }
 
+    /**
+     * Updates the game state while a match is in progress.
+     */
     private void updatePlaying() {
         gameTick++;
-        if (shakeTick > 0)
-            shakeTick--;
+        if (shakeTick > 0) shakeTick--;
 
-        // Advance countdown; players cannot act until it reaches 180 ("FIGHT!")
+        // 1. Advance countdown phase (3... 2... 1... FIGHT!)
         if (countdownTick < 180) {
             countdownTick++;
-            // During countdown: apply gravity / platform collision so players land
-            // correctly, but do NOT process any input-driven logic.
+            // During countdown: apply gravity so players land correctly, but disable movement/shooting
             p1.updateGravityOnly(arena.getPlatforms());
             p2.updateGravityOnly(arena.getPlatforms());
             particlePool.getPool().forEach(Particle::update);
-            if (flashAlpha > 0)
-                flashAlpha -= 12;
+            if (flashAlpha > 0) flashAlpha -= 12;
             return;
         }
 
+        // 2. Spawn Map Hazards periodically
         hazardTimer++;
         int hiv = selMap == MapTheme.VOLCANO ? 110 : selMap == MapTheme.CASTLE ? 190 : 0;
         if (hiv > 0 && hazardTimer >= hiv) {
             hazardTimer = 0;
-            if (selMap == MapTheme.VOLCANO)
-                hazards.add(MapHazard.spawnFireball(rng));
-            else
-                hazards.add(MapHazard.spawnRock(rng));
+            if (selMap == MapTheme.VOLCANO) hazards.add(MapHazard.spawnFireball(rng));
+            else hazards.add(MapHazard.spawnRock(rng));
         }
+
+        // 3. Update Entities
         arena.tick();
         p1.update(arena.getPlatforms());
         p2.update(arena.getPlatforms());
-        if (p1.shakeRequest > 0) {
-            shake(3);
-            p1.shakeRequest = 0;
-        }
-        if (p2.shakeRequest > 0) {
-            shake(3);
-            p2.shakeRequest = 0;
-        }
+        
+        // 4. Handle Screen Shake requests from hits
+        if (p1.shakeRequest > 0) { shake(3); p1.shakeRequest = 0; }
+        if (p2.shakeRequest > 0) { shake(3); p2.shakeRequest = 0; }
+
+        // 5. Update Hazards & Particles
         hazards.forEach(MapHazard::update);
         hazards.removeIf(h -> !h.active);
+        
+        // 6. Collision detection
         checkArrows();
         checkHazards();
         checkFall();
+        
         particlePool.getPool().forEach(Particle::update);
-        if (flashAlpha > 0)
-            flashAlpha -= 12;
+        
+        // Decay screen flash
+        if (flashAlpha > 0) flashAlpha -= 12;
     }
 
     private void updateSlowMo() {
@@ -275,37 +293,40 @@ public class GamePanel extends JPanel
         hitCheck(p2, p1);
     }
 
+    /**
+     * Checks if arrows from one player hit the opponent.
+     * @param sh The player who fired the arrows (Shooter)
+     * @param tg The player who might be hit (Target)
+     */
     private void hitCheck(Player sh, Player tg) {
         if (!tg.isAlive() || tg.isInvincible())
             return;
-        Rectangle tb = tg.getBounds(), hb = Arrow.getHeadshotBounds(tb);
+            
+        Rectangle tb = tg.getBounds();
+        Rectangle hb = Arrow.getHeadshotBounds(tb);
+        
         for (Arrow a : sh.arrows) {
-            if (!a.active)
-                continue;
+            if (!a.active) continue;
+            
             Rectangle ab = a.getBounds();
             if (ab.intersects(tb)) {
-                a.active = false;
+                a.active = false; // Arrow is consumed on hit
                 sh.arrowsHit++;
+                
+                // Check for headshot (higher damage/visuals)
                 boolean hs = ab.intersects(hb);
                 if (hs) {
                     sh.headshots++;
-                    boolean d = tg.takeHit();
-                    if (!d)
-                        d = tg.takeHit();
+                    boolean d = tg.takeHit(); // Headshots take 2 HP (double hit logic)
+                    if (!d) d = tg.takeHit();
                     parts(a.x, a.y, new Color(255, 220, 0), 22);
                     AudioManager.play(AudioManager.Sound.HEADSHOT);
                     shake(5);
-                    if (d) {
-                        kill(tg);
-                        return;
-                    }
+                    if (d) { kill(tg); return; }
                 } else {
-                    boolean d = tg.takeHit();
+                    boolean d = tg.takeHit(); // Regular hit takes 1 HP
                     parts(a.x, a.y, new Color(255, 160, 60), 10);
-                    if (d) {
-                        kill(tg);
-                        return;
-                    }
+                    if (d) { kill(tg); return; }
                 }
             }
         }
@@ -349,24 +370,29 @@ public class GamePanel extends JPanel
             kill(p2);
     }
 
+    /**
+     * Handles the death of a player.
+     * Triggers slow-motion, death particles, and updates round scores.
+     */
     private void kill(Player p) {
-        p1F = p1.arrowsFired;
-        p1H = p1.arrowsHit;
-        p1S = p1.headshots;
-        p2F = p2.arrowsFired;
-        p2H = p2.arrowsHit;
-        p2S = p2.headshots;
-        winner = (p.playerIndex == 0) ? 2 : 1;
+        // Cache stats for the result screen
+        p1F = p1.arrowsFired; p1H = p1.arrowsHit; p1S = p1.headshots;
+        p2F = p2.arrowsFired; p2H = p2.arrowsHit; p2S = p2.headshots;
+
+        winner = (p.playerIndex == 0) ? 2 : 1; // Opposite player wins
         winTxt = "Player " + winner + " Wins!";
         flashAlpha = 255;
-        if (winner == 1)
-            roundsP1++;
-        else
-            roundsP2++;
-        parts(p.getCenterX(), p.getCenterY(), p.playerIndex == 0 ? new Color(80, 130, 255) : new Color(255, 80, 80),
-                45);
+        
+        if (winner == 1) roundsP1++;
+        else roundsP2++;
+        
+        // Spawn death particles in the player's color
+        parts(p.getCenterX(), p.getCenterY(), p.playerIndex == 0 ? new Color(80, 130, 255) : new Color(255, 80, 80), 45);
+        
         AudioManager.play(AudioManager.Sound.WIN);
         shake(5);
+        
+        // Enter slow-motion phase before showing results
         slowMoTick = 0;
         slowMoRatio = 1;
         state = GameState.SLOW_MO;

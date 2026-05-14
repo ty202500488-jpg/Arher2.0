@@ -2,7 +2,9 @@ import javax.sound.sampled.*;
 import javax.sound.midi.*;
 
 /**
- * AudioManager v2 — Richer procedural sounds + new DASH sound.
+ * The AudioManager handles all sound effects (SFX) and background music (BGM).
+ * It generates sounds procedurally using mathematical waveforms (Sine, Noise) 
+ * instead of loading external audio files, making the project lightweight.
  */
 public class AudioManager {
 
@@ -87,6 +89,10 @@ public class AudioManager {
         }).start();
     }
 
+    /** 
+     * Generates raw audio samples mathematically for the given sound effect.
+     * Uses frequency modulation and noise to create "retro" 8-bit style sounds.
+     */
     private static byte[] generateSoundData(Sound sound) {
         int durationMs = switch (sound) {
             case SHOOT -> 140;

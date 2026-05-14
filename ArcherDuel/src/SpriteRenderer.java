@@ -3,8 +3,9 @@ import java.awt.image.BufferedImage;
 import java.util.Random;
 
 /**
- * SpriteRenderer v3
- * Adds: DASH animation row, rage-tinted sprites, better proportions.
+ * The SpriteRenderer is responsible for programmatically generating pixel-art sprites.
+ * Instead of loading external image files, it "draws" each animation frame into a 
+ * buffered image sheet at runtime. This ensures the game has zero external assets.
  */
 public class SpriteRenderer {
 
@@ -60,6 +61,10 @@ public class SpriteRenderer {
         return facingRight ? src : flipH(src);
     }
 
+    /**
+     * Constructs the sprite sheet for a specific player.
+     * Iterates through every animation row and frame, drawing them using geometric shapes.
+     */
     private BufferedImage buildSheet(int player) {
         int numRows = FRAME_COUNTS.length; // 5 rows now
         int maxFrames = 0;
@@ -141,6 +146,10 @@ public class SpriteRenderer {
 
     // ── CORE ARCHER DRAWING ────────────────────────────────────
 
+    /**
+     * The core drawing logic for an archer.
+     * Uses rectangles, ovals, and arcs to build a humanoid character with a bow.
+     */
     private void drawArcher(Graphics2D g, int ox, int oy, Color[] pal,
             int walkF, boolean isWalk, int shootF, boolean isDash) {
         Color main = pal[0], light = pal[1], skin = pal[2],
