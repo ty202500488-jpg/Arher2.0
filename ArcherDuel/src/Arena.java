@@ -81,7 +81,6 @@ public class Arena {
     // SKY
     private static final Color SK_BG1      = new Color(90, 130, 220);
     private static final Color SK_BG2      = new Color(230, 170, 120);
-    private static final Color SK_CLOUD    = new Color(255, 255, 255, 190);
     private static final Color SK_DIRT_MV  = new Color(160, 100, 50);
     private static final Color SK_DIRT_ST  = new Color(120, 80, 45);
     private static final Color SK_GRASS_MV = new Color(100, 200, 60);
@@ -93,9 +92,6 @@ public class Arena {
     private static final Color SK_AMB_C    = new Color(255, 255, 220, 200);
     private static final Font  SK_FONT     = new java.awt.Font("Monospaced", java.awt.Font.BOLD, 14);
     // Shared / decorations
-    private static final Color BAR_BODY    = new Color(120, 70, 30);
-    private static final Color BAR_RIM     = new Color(160, 100, 50);
-    private static final Color BAR_BAND    = new Color(80, 80, 80);
     private static final Color PLT_HILITE  = new Color(255, 255, 255, 90);
     private static final Color PLT_SHADOW  = new Color(0, 0, 0, 50);
     private static final Color VINE_GRN    = new Color(22, 70, 22);
@@ -171,12 +167,6 @@ public class Arena {
 
             // Static Platforms
             drawAllPlatforms(g2, FC_PLAT_S, FC_PLAT_M, true);
-
-            // Barrels
-            drawBarrel(g2, 420, GROUND_Y); 
-            drawBarrel(g2, 960, GROUND_Y);
-            drawBarrel(g2, WIDTH/2 - 50, GROUND_Y); 
-            drawBarrel(g2, WIDTH/2 + 30, GROUND_Y);
             
             g2.dispose();
         }
@@ -269,15 +259,6 @@ public class Arena {
     private void drawSky(Graphics2D g) {
         // Dawn gradient
         grad(g, SK_BG1, SK_BG2);
-        // Clouds (drifting)
-        long t = System.currentTimeMillis();
-        g.setColor(SK_CLOUD);
-        int[] cxs = { 60, 300, 580, 850, 1110, 1320 };
-        int[] cys = { 70, 150, 55, 130, 80, 155 };
-        for (int i = 0; i < cxs.length; i++) {
-            int cx = (int) (cxs[i] + (t / 50 + i * 120) % 250) - 100;
-            drawCloud(g, cx % W(), cys[i]);
-        }
         // Sky island platforms
         for (int i = 0; i < data.platforms.length; i++) {
             Rectangle r = data.platforms[i];
@@ -425,19 +406,6 @@ public class Arena {
         }
     }
 
-    // ── DECORATIONS ───────────────────────────────────────────────
-    private void drawBarrel(Graphics2D g, int bx, int by) {
-        g.setColor(BAR_BODY);
-        g.fillRoundRect(bx, by - 28, 22, 28, 6, 6);
-        g.setColor(BAR_RIM);
-        g.drawRoundRect(bx, by - 28, 22, 28, 6, 6);
-        g.setColor(BAR_BAND);
-        g.fillRect(bx - 1, by - 24, 24, 4);
-        g.fillRect(bx - 1, by - 10, 24, 4);
-    }
-
-
-
     private void drawMovingPlatformGlow(Graphics2D g) {
         if (data.theme == MapTheme.FOREST) return;
         long t = System.currentTimeMillis();
@@ -475,11 +443,6 @@ public class Arena {
     }
 
 
-    private void drawCloud(Graphics2D g, int cx, int cy) {
-        g.fillOval(cx, cy + 10, 60, 40);
-        g.fillOval(cx + 20, cy, 80, 50);
-        g.fillOval(cx + 70, cy + 10, 60, 40);
-    }
 
     private void drawAmb(Graphics2D g, Color glow, Color core) {
         long t = System.currentTimeMillis();

@@ -42,7 +42,6 @@ public class GameRenderer {
             HP_RND_BG = new Color(40, 40, 40),
             HP_RAGE = new Color(255, 80, 0),
             HP_LABEL = new Color(100, 100, 100),
-            WIND_COL = new Color(140, 200, 255),
             FIGHT_COL = new Color(80, 255, 80),
             FINAL_GLO = new Color(255, 220, 0),
             LBL_LOAD = new Color(210, 185, 130),
@@ -50,8 +49,7 @@ public class GameRenderer {
             SUB_FOR = new Color(175, 215, 140),
             CTRL_TEXT = new Color(180, 180, 180),
             CTRL_P1 = new Color(80, 140, 255),
-            CTRL_P2 = new Color(255, 80, 80),
-            TIMER_COL = new Color(200, 200, 200);
+            CTRL_P2 = new Color(255, 80, 80);
 
     static final BasicStroke STROKE2 = new BasicStroke(2f),
             STROKE1_2 = new BasicStroke(1.2f),
@@ -435,9 +433,6 @@ public class GameRenderer {
     static void drawHUD(Graphics2D g, Player p1, Player p2, float wx, int tick) {
         drawHP(g, 10, 10, p1, HUD_BLUE, true);
         drawHP(g, W - 310, 10, p2, HUD_RED, false);
-        drawTimer(g, tick);
-        if (Math.abs(wx) > 0.2f)
-            drawWind(g, wx);
     }
 
     static void drawHP(Graphics2D g, int x, int y, Player p, Color c, boolean left) {
@@ -456,22 +451,6 @@ public class GameRenderer {
 
     }
 
-    static void drawTimer(Graphics2D g, int tick) {
-        int s = tick / 60, m = s / 60;
-        s %= 60;
-        String t = String.format("%d:%02d", m, s);
-        panel(g, W / 2 - 52, 6, 104, 30);
-        txt(g, t, W / 2, 20, F14, TIMER_COL);
-    }
-
-    static void drawWind(Graphics2D g, float wx) {
-        String d = wx > 1 ? ">>> WIND" : wx > 0.3f ? "> WIND" : wx < -1 ? "WIND <<<" : "WIND <";
-        panel(g, W / 2 - 65, 40, 130, 22);
-        g.setFont(F11);
-        g.setColor(WIND_COL);
-        FontMetrics fm = g.getFontMetrics();
-        g.drawString(d, W / 2 - fm.stringWidth(d) / 2, 56);
-    }
 
     // ── OVERLAYS ─────────────────────────────────────────────────
     static void drawCountdown(Graphics2D g, int tick) {
