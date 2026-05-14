@@ -441,7 +441,7 @@ public class GamePanel extends JPanel
             g.fillRect(-ox, -oy, GameWindow.WIDTH, GameWindow.HEIGHT);
         }
         g.translate(-ox, -oy);
-        GameRenderer.drawHUD(g, p1, p2, Arrow.windX, gameTick, roundsP1, roundsP2, WIN_ROUNDS);
+        GameRenderer.drawHUD(g, p1, p2, Arrow.windX, gameTick);
         if (countdownTick < 180)
             GameRenderer.drawCountdown(g, countdownTick);
         if (state == GameState.SLOW_MO)

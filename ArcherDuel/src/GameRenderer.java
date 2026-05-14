@@ -429,15 +429,15 @@ public class GameRenderer {
     }
 
     // ── HUD ───────────────────────────────────────────────────────
-    static void drawHUD(Graphics2D g, Player p1, Player p2, float wx, int tick, int r1, int r2, int rw) {
-        drawHP(g, 10, 10, p1, HUD_BLUE, true, r1, rw);
-        drawHP(g, W - 310, 10, p2, HUD_RED, false, r2, rw);
+    static void drawHUD(Graphics2D g, Player p1, Player p2, float wx, int tick) {
+        drawHP(g, 10, 10, p1, HUD_BLUE, true);
+        drawHP(g, W - 310, 10, p2, HUD_RED, false);
         drawTimer(g, tick);
         if (Math.abs(wx) > 0.2f)
             drawWind(g, wx);
     }
 
-    static void drawHP(Graphics2D g, int x, int y, Player p, Color c, boolean left, int rnd, int rw) {
+    static void drawHP(Graphics2D g, int x, int y, Player p, Color c, boolean left) {
         panel(g, x, y, 300, 52);
         g.setColor(p.isAlive() ? c : HP_GRAY);
         g.setFont(F14);
@@ -450,20 +450,8 @@ public class GameRenderer {
             g.fillOval(hx + 5, hy, 9, 9);
             g.fillPolygon(new int[] { hx, hx + 7, hx + 14 }, new int[] { hy + 6, hy + 16, hy + 6 }, 3);
         }
-        g.setColor(HP_LABEL);
-        g.setFont(F11);
-        g.drawString("R:", x + 80, y + 46);
-        for (int i = 0; i < rw; i++) {
-            g.setColor(i < rnd ? c : HP_RND_BG);
-            g.fillOval(x + 98 + i * 18, y + 36, 12, 12);
-        }
-        if (p.rageMode && p.isAlive()) {
-            long t = System.currentTimeMillis();
-            float pp = (float) (Math.sin(t / 150.0) * 0.5 + 0.5);
-            g.setColor(new Color(HP_RAGE.getRed(), HP_RAGE.getGreen(), HP_RAGE.getBlue(), (int) (pp * 200)));
-            g.setFont(F11);
-            g.drawString("RAGE!", x + 200, y + 46);
-        }
+
+
     }
 
     static void drawTimer(Graphics2D g, int tick) {
