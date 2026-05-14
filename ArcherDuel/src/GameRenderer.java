@@ -3,60 +3,60 @@ import java.util.List;
 
 public class GameRenderer {
     static final int W = GameWindow.WIDTH, H = GameWindow.HEIGHT;
-    static final Color GOLD  = new Color(230, 185, 55),
-                        AMBER = new Color(255, 195, 70),
-                        DARK  = new Color(20, 16, 38),
-                        STONE = new Color(55, 50, 72),
-                        TITLE_COL = new Color(255, 210, 85);
+    static final Color GOLD = new Color(230, 185, 55),
+            AMBER = new Color(255, 195, 70),
+            DARK = new Color(20, 16, 38),
+            STONE = new Color(55, 50, 72),
+            TITLE_COL = new Color(255, 210, 85);
     static final Font F72 = new Font("Monospaced", Font.BOLD, 72), F36 = new Font("Monospaced", Font.BOLD, 36),
             F20 = new Font("Monospaced", Font.BOLD, 20), F16 = new Font("Monospaced", Font.BOLD, 16),
             F14 = new Font("Monospaced", Font.PLAIN, 14),
             F11 = new Font("Monospaced", Font.PLAIN, 11),
-            F9  = new Font("Monospaced", Font.BOLD, 9);
+            F9 = new Font("Monospaced", Font.BOLD, 9);
 
     static final Color SHADOW = new Color(0, 0, 0, 140),
-                       PANEL_BG = new Color(20, 16, 35, 210),
-                       PANEL_BRD = new Color(180, 140, 40, 90),
-                       BTN_BG_H = new Color(70, 52, 18),
-                       BTN_BG_S = new Color(55, 42, 14),
-                       BTN_BG_N = new Color(32, 26, 10),
-                       BTN_BRD_N = new Color(120, 95, 40),
-                       BTN_FC_H  = new Color(255, 235, 160),
-                       BTN_FC_N  = new Color(200, 175, 110),
-                       BTN_GLOW  = new Color(230, 185, 55, 70),
-                       STAR_W    = new Color(255, 255, 255),
-                       STAR_G    = new Color(255, 230, 160),
-                       STAR_B    = new Color(200, 220, 255),
-                       TEXT_SUB  = new Color(210, 175, 100),
-                       DIVIDER   = new Color(200, 155, 50, 120),
-                       BAR_BG    = new Color(40, 30, 12),
-                       BAR_BRD   = new Color(150, 110, 40, 120),
-                       BAR_SHN   = new Color(255, 240, 180, 55),
-                       BAR_TIP   = new Color(255, 245, 160),
-                       HINT_COL  = new Color(120, 110, 80),
-                       HUD_BLUE  = new Color(60, 120, 255),
-                       HUD_RED   = new Color(255, 70, 70),
-                       HP_FULL   = new Color(220, 50, 50),
-                       HP_EMPTY  = new Color(50, 25, 25),
-                       HP_GRAY   = new Color(70, 70, 70),
-                       HP_RND_BG = new Color(40, 40, 40),
-                       HP_RAGE   = new Color(255, 80, 0),
-                       HP_LABEL  = new Color(100, 100, 100),
-                       WIND_COL  = new Color(140, 200, 255),
-                       FIGHT_COL = new Color(80, 255, 80),
-                       FINAL_GLO = new Color(255, 220, 0),
-                       LBL_LOAD  = new Color(210, 185, 130),
-                       LBL_TIP   = new Color(185, 160, 100),
-                       SUB_FOR   = new Color(175, 215, 140),
-                       CTRL_TEXT = new Color(180, 180, 180),
-                       CTRL_P1   = new Color(80, 140, 255),
-                       CTRL_P2   = new Color(255, 80, 80),
-                       TIMER_COL = new Color(200, 200, 200);
+            PANEL_BG = new Color(20, 16, 35, 210),
+            PANEL_BRD = new Color(180, 140, 40, 90),
+            BTN_BG_H = new Color(70, 52, 18),
+            BTN_BG_S = new Color(55, 42, 14),
+            BTN_BG_N = new Color(32, 26, 10),
+            BTN_BRD_N = new Color(120, 95, 40),
+            BTN_FC_H = new Color(255, 235, 160),
+            BTN_FC_N = new Color(200, 175, 110),
+            BTN_GLOW = new Color(230, 185, 55, 70),
+            STAR_W = new Color(255, 255, 255),
+            STAR_G = new Color(255, 230, 160),
+            STAR_B = new Color(200, 220, 255),
+            TEXT_SUB = new Color(210, 175, 100),
+            DIVIDER = new Color(200, 155, 50, 120),
+            BAR_BG = new Color(40, 30, 12),
+            BAR_BRD = new Color(150, 110, 40, 120),
+            BAR_SHN = new Color(255, 240, 180, 55),
+            BAR_TIP = new Color(255, 245, 160),
+            HINT_COL = new Color(120, 110, 80),
+            HUD_BLUE = new Color(60, 120, 255),
+            HUD_RED = new Color(255, 70, 70),
+            HP_FULL = new Color(220, 50, 50),
+            HP_EMPTY = new Color(50, 25, 25),
+            HP_GRAY = new Color(70, 70, 70),
+            HP_RND_BG = new Color(40, 40, 40),
+            HP_RAGE = new Color(255, 80, 0),
+            HP_LABEL = new Color(100, 100, 100),
+            WIND_COL = new Color(140, 200, 255),
+            FIGHT_COL = new Color(80, 255, 80),
+            FINAL_GLO = new Color(255, 220, 0),
+            LBL_LOAD = new Color(210, 185, 130),
+            LBL_TIP = new Color(185, 160, 100),
+            SUB_FOR = new Color(175, 215, 140),
+            CTRL_TEXT = new Color(180, 180, 180),
+            CTRL_P1 = new Color(80, 140, 255),
+            CTRL_P2 = new Color(255, 80, 80),
+            TIMER_COL = new Color(200, 200, 200);
 
     static final BasicStroke STROKE2 = new BasicStroke(2f),
-                             STROKE1_2 = new BasicStroke(1.2f),
-                             STROKE1 = new BasicStroke(1f),
-                             STROKE3 = new BasicStroke(3f);
+            STROKE1_2 = new BasicStroke(1.2f),
+            STROKE1 = new BasicStroke(1f),
+            STROKE3 = new BasicStroke(3f);
 
     private static final Rectangle REUSABLE_RECT = new Rectangle();
 
@@ -189,9 +189,9 @@ public class GameRenderer {
     }
 
     static void drawBtn(Graphics2D g, Rectangle r, String s, boolean sel, boolean hover) {
-        Color bg     = hover ? BTN_BG_H : sel ? BTN_BG_S : BTN_BG_N;
+        Color bg = hover ? BTN_BG_H : sel ? BTN_BG_S : BTN_BG_N;
         Color border = hover || sel ? AMBER : BTN_BRD_N;
-        Color fc     = hover || sel ? BTN_FC_H : BTN_FC_N;
+        Color fc = hover || sel ? BTN_FC_H : BTN_FC_N;
         if (hover || sel) {
             g.setColor(BTN_GLOW);
             g.fillRoundRect(r.x - 3, r.y - 3, r.width + 6, r.height + 6, 12, 12);
@@ -215,17 +215,18 @@ public class GameRenderer {
 
     static void bgPts(Graphics2D g, float[][] pts, int al) {
         for (float[] p : pts) {
-            int idx = (int)(p[0] + p[1]) % 3;
+            int idx = (int) (p[0] + p[1]) % 3;
             Color base = idx == 0 ? STAR_G : idx == 1 ? STAR_W : STAR_B;
             g.setColor(new Color(base.getRed(), base.getGreen(), base.getBlue(), al));
-            int sz = (int)(p[0] * 31 + p[1]) % 3 == 0 ? 3 : 2;
+            int sz = (int) (p[0] * 31 + p[1]) % 3 == 0 ? 3 : 2;
             g.fillOval((int) p[0], (int) p[1], sz, sz);
         }
     }
 
     static void drawParticles(Graphics2D g, List<Particle> ps) {
         for (var p : ps) {
-            if (!p.active) continue;
+            if (!p.active)
+                continue;
             int a = Math.max(0, Math.min(255, p.alpha));
             g.setColor(new Color(p.r, p.grn, p.b, a));
             g.fillRect((int) p.x, (int) p.y, p.size, p.size);
@@ -241,27 +242,27 @@ public class GameRenderer {
 
         // ── Layout anchors ──
         int centerX = W / 2;
-        int titleY   = H / 2 - 110;   // main title baseline
-        int subY     = titleY + 36;    // subtitle just below title
-        int divY     = subY  + 22;     // thin separator line
-        int barY     = divY  + 28;     // progress bar top
-        int barW     = 460;
-        int barH     = 18;
-        int barX     = centerX - barW / 2;
+        int titleY = H / 2 - 110; // main title baseline
+        int subY = titleY + 36; // subtitle just below title
+        int divY = subY + 22; // thin separator line
+        int barY = divY + 28; // progress bar top
+        int barW = 460;
+        int barH = 18;
+        int barX = centerX - barW / 2;
         int loadLblY = barY + barH + 26; // "Loading..." label
-        int tipY     = H - 48;
-        int skipY    = H - 22;
+        int tipY = H - 48;
+        int skipY = H - 22;
 
         // Ambient glow behind title
-        float glow = (float)(Math.sin(t / 600.0) * 0.5 + 0.5);
-        g.setColor(new Color(200, 140, 40, (int)(20 + glow * 40)));
+        float glow = (float) (Math.sin(t / 600.0) * 0.5 + 0.5);
+        g.setColor(new Color(200, 140, 40, (int) (20 + glow * 40)));
         g.fillOval(centerX - 260, titleY - 80, 520, 140);
 
         // ── Title ──
         txtSpaced(g, "ARCHER DUEL", centerX, titleY, F72, TITLE_COL, 6);
 
         // ── Subtitle ──
-        txt(g, "Medieval  1v1  Arena", centerX, subY, F14, TEXT_SUB);
+        txt(g, "1v1  Arena", centerX, subY, F14, TEXT_SUB);
 
         // ── Thin gold divider ──
         g.setColor(DIVIDER);
@@ -274,15 +275,15 @@ public class GameRenderer {
         g.drawRoundRect(barX, barY, barW, barH, 9, 9);
         float r = Math.min(1f, (float) tick / max);
         g.setPaint(new GradientPaint(barX, 0, new Color(160, 90, 20), barX + barW, 0, AMBER));
-        g.fillRoundRect(barX, barY, (int)(barW * r), barH, 9, 9);
+        g.fillRoundRect(barX, barY, (int) (barW * r), barH, 9, 9);
         g.setPaint(null);
         // Sheen
         g.setColor(BAR_SHN);
-        g.fillRoundRect(barX, barY, (int)(barW * r), barH / 2, 9, 9);
+        g.fillRoundRect(barX, barY, (int) (barW * r), barH / 2, 9, 9);
         // Arrow-tip at leading edge
-        int tip = barX + (int)(barW * r);
+        int tip = barX + (int) (barW * r);
         g.setColor(BAR_TIP);
-        g.fillPolygon(new int[]{tip, tip + 14, tip}, new int[]{barY, barY + barH / 2, barY + barH}, 3);
+        g.fillPolygon(new int[] { tip, tip + 14, tip }, new int[] { barY, barY + barH / 2, barY + barH }, 3);
 
         // ── "Loading..." label ──
         txt(g, "Loading...", centerX, loadLblY, F14, LBL_LOAD);
@@ -318,22 +319,22 @@ public class GameRenderer {
         g.setPaint(null);
 
         // ── Layout anchors ──
-        int centerX  = W / 2;
-        int titleY   = H / 2 - 155;   // main title baseline
-        int subY     = titleY + 36;    // subtitle
-        int divY     = subY   + 20;    // thin gold divider
+        int centerX = W / 2;
+        int titleY = H / 2 - 155; // main title baseline
+        int subY = titleY + 36; // subtitle
+        int divY = subY + 20; // thin gold divider
 
         // ── Ambient glow behind title ──
         long t = System.currentTimeMillis();
-        float glow = (float)(Math.sin(t / 700.0) * 0.5 + 0.5);
-        g.setColor(new Color(180, 130, 30, (int)(15 + glow * 30)));
+        float glow = (float) (Math.sin(t / 700.0) * 0.5 + 0.5);
+        g.setColor(new Color(180, 130, 30, (int) (15 + glow * 30)));
         g.fillOval(centerX - 280, titleY - 80, 560, 140);
 
         // ── Title ──
         txtSpaced(g, "ARCHER  DUEL", centerX, titleY, F72, TITLE_COL, 6);
 
         // ── Subtitle ──
-        txt(g, "Medieval  1v1  Arena", centerX, subY, F14, SUB_FOR);
+        txt(g, "1v1  Arena", centerX, subY, F14, SUB_FOR);
 
         // ── Thin gold divider ──
         g.setColor(DIVIDER);
@@ -370,8 +371,10 @@ public class GameRenderer {
         REUSABLE_RECT.setBounds(cx - 380, py + ph / 2 - 22, 80, 44);
         // Actually, drawBtn takes a Rectangle. I should probably just pass the bounds.
         // But drawBtn uses r.x, r.y etc.
-        // Let's use a local Rectangle for buttons if they are used for drawing too, or just drawBtn with bounds.
-        // Since drawBtn is called with a Rectangle, I'll keep it as is for now or use a local one.
+        // Let's use a local Rectangle for buttons if they are used for drawing too, or
+        // just drawBtn with bounds.
+        // Since drawBtn is called with a Rectangle, I'll keep it as is for now or use a
+        // local one.
         // Actually, Rectangle is small, but if I can avoid it...
         // Let's use a simple Rectangle for now to avoid complexity in this refactor.
         Rectangle lb = new Rectangle(cx - 380, py + ph / 2 - 22, 80, 44);
@@ -451,7 +454,6 @@ public class GameRenderer {
             g.fillPolygon(new int[] { hx, hx + 7, hx + 14 }, new int[] { hy + 6, hy + 16, hy + 6 }, 3);
         }
 
-
     }
 
     static void drawTimer(Graphics2D g, int tick) {
@@ -483,7 +485,8 @@ public class GameRenderer {
     static void drawSlowMo(Graphics2D g, float r) {
         g.setColor(new Color(0, 0, 0, (int) (r * 40)));
         g.fillRect(0, 0, W, H);
-        txt(g, "★  FINAL HIT  ★", W / 2, H / 2 - 160, F20, new Color(FINAL_GLO.getRed(), FINAL_GLO.getGreen(), FINAL_GLO.getBlue(), (int) (r * 220)));
+        txt(g, "★  FINAL HIT  ★", W / 2, H / 2 - 160, F20,
+                new Color(FINAL_GLO.getRed(), FINAL_GLO.getGreen(), FINAL_GLO.getBlue(), (int) (r * 220)));
     }
 
     // ── PAUSE ─────────────────────────────────────────────────────
@@ -507,11 +510,11 @@ public class GameRenderer {
         g.fillRect(0, 0, W, H);
 
         // Layout anchors
-        int cx  = W / 2;
-        int winY   = H / 2 - 140;  // winner text
-        int scoreY = winY + 52;    // score line
-        int divY   = scoreY + 20;  // thin divider
-        int hintY  = H - 22;
+        int cx = W / 2;
+        int winY = H / 2 - 140; // winner text
+        int scoreY = winY + 52; // score line
+        int divY = scoreY + 20; // thin divider
+        int hintY = H - 22;
 
         // Winner colour
         Color wc = win == 1 ? STAR_B : HUD_RED;
@@ -519,7 +522,7 @@ public class GameRenderer {
         // Winner text (large, spaced)
         txtSpaced(g, wt.toUpperCase(), cx, winY, F72, wc, 4);
 
-        // Score  "P1  2 — 1  P2"
+        // Score "P1 2 — 1 P2"
         txt(g, "P1   " + r1 + "  —  " + r2 + "   P2", cx, scoreY, F36, Color.WHITE);
 
         // Thin divider
@@ -599,9 +602,7 @@ public class GameRenderer {
                 g.fillRect(cx - 260, cy + 65, 520, 12);
                 g.fillRect(cx - 170, cy + 15, 340, 12);
                 g.fillRect(cx - 90, cy - 25, 180, 12);
-                g.setColor(new Color(255, 255, 255, 80));
-                for (int x = -240; x < 240; x += 45)
-                    g.fillPolygon(new int[] { cx + x, cx + x + 11, cx + x + 22 }, new int[] { 0, cy - 30, 0 }, 3);
+
             }
             case SKY_ISLANDS -> {
                 g.setColor(new Color(60, 160, 50));
