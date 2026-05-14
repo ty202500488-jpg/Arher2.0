@@ -20,7 +20,7 @@ public class GamePanel extends JPanel
     private int hazardTimer = 0;
 
     private static final Font FPS_FONT = new Font("Monospaced", Font.BOLD, 12);
-    
+
     // Night mask constants
     private static final Color NIGHT_BASE_OVERLAY = new Color(0, 0, 0, 215);
 
@@ -40,6 +40,9 @@ public class GamePanel extends JPanel
     private int resultCursor = -1; // 0=Rematch 1=MapSelect 2=MainMenu
     private int pauseCursor = -1; // 0=Resume 1=Restart 2=Settings 3=MainMenu
     private int exitCursor = 0; // 0=No 1=Yes
+    private int p1Skin = 0, p2Skin = 1;
+    private int p1SkinCursor = 0, p2SkinCursor = 1;
+    private boolean p1Ready = false, p2Ready = false;
     private static final int PAUSE_COUNT = 4, RESULT_COUNT = 3;
 
     // Settings
@@ -112,12 +115,13 @@ public class GamePanel extends JPanel
             // Far right island: { W-180, GY-270, 150, 20 }
             int islandTop = ArenaData.GY - 270;
             float spawnY = islandTop - Player.H;
-            
-            p1 = new Player(0, 30 + 30, spawnY, sprites, arrowPool);
-            p2 = new Player(1, ArenaData.W - 180 + 150 - Player.W - 30, spawnY, sprites, arrowPool);
+
+            p1 = new Player(0, 30 + 30, spawnY, sprites, arrowPool, p1Skin);
+            p2 = new Player(1, ArenaData.W - 180 + 150 - Player.W - 30, spawnY, sprites, arrowPool, p2Skin);
         } else {
-            p1 = new Player(0, 100, Arena.GROUND_Y - Player.H, sprites, arrowPool);
-            p2 = new Player(1, GameWindow.WIDTH - 100 - Player.W, Arena.GROUND_Y - Player.H, sprites, arrowPool);
+            p1 = new Player(0, 100, Arena.GROUND_Y - Player.H, sprites, arrowPool, p1Skin);
+            p2 = new Player(1, GameWindow.WIDTH - 100 - Player.W, Arena.GROUND_Y - Player.H, sprites, arrowPool,
+                    p2Skin);
         }
 
         p1.setIceMode(selMap.hasIce);
@@ -128,8 +132,10 @@ public class GamePanel extends JPanel
         hazardTimer = 0;
         buildHazards();
         // Reset pools
-        for (Particle p : particlePool.getPool()) p.active = false;
-        for (Arrow a : arrowPool.getPool()) a.active = false;
+        for (Particle p : particlePool.getPool())
+            p.active = false;
+        for (Arrow a : arrowPool.getPool())
+            a.active = false;
         winner = 0;
         flashAlpha = 0;
         countdownTick = 0;
@@ -171,16 +177,28 @@ public class GamePanel extends JPanel
         updatePulse();
         updateBg();
         switch (state) {
-            case LOADING -> {
+            case LOADING:
                 loadTick++;
                 if (loadTick >= LOAD_DUR)
                     state = GameState.MAIN_MENU;
-            }
-            case MAP_SELECT -> updateMapSelect();
-            case MAIN_MENU, CONTROLS, SETTINGS, PAUSED, OVER, EXIT_CONFIRM -> {
-            }
-            case PLAYING -> updatePlaying();
-            case SLOW_MO -> updateSlowMo();
+                break;
+            case MAP_SELECT:
+                updateMapSelect();
+                break;
+            case PLAYING:
+                updatePlaying();
+                break;
+            case SLOW_MO:
+                updateSlowMo();
+                break;
+            case MAIN_MENU:
+            case CONTROLS:
+            case SETTINGS:
+            case PAUSED:
+            case OVER:
+            case EXIT_CONFIRM:
+            case SKIN_SELECT:
+                break;
         }
     }
 
@@ -311,7 +329,6 @@ public class GamePanel extends JPanel
         }
     }
 
-
     private void checkHazards() {
         for (MapHazard h : hazards) {
             if (!h.active || h.type == MapHazard.Type.ICE_PATCH)
@@ -388,7 +405,7 @@ public class GamePanel extends JPanel
     @Override
     protected void paintComponent(Graphics gRaw) {
         super.paintComponent(gRaw);
-        
+
         // FPS Tracking
         frameCount++;
         long now = System.currentTimeMillis();
@@ -404,14 +421,32 @@ public class GamePanel extends JPanel
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         switch (state) {
-            case LOADING -> GameRenderer.drawLoading(g, loadTick, LOAD_DUR, bgPts, mouseX, mouseY);
-            case MAIN_MENU -> GameRenderer.drawMainMenu(g, menuCursor, pulse, bgPts, mouseX, mouseY);
-            case MAP_SELECT -> GameRenderer.drawMapSelect(g, mapCursor, MapTheme.values(), pulse, mapTrans, mapTransDir,
-                    mouseX, mouseY);
-            case CONTROLS -> GameRenderer.drawControls(g, pulse, mouseX, mouseY);
-            case SETTINGS -> GameRenderer.drawSettings(g, bgmOn, sfxOn, pulse, mouseX, mouseY);
-            case EXIT_CONFIRM -> GameRenderer.drawExitConfirm(g, exitCursor, mouseX, mouseY);
-            default -> drawGame(g);
+            case LOADING:
+                GameRenderer.drawLoading(g, loadTick, LOAD_DUR, bgPts, mouseX, mouseY);
+                break;
+            case MAIN_MENU:
+                GameRenderer.drawMainMenu(g, menuCursor, pulse, bgPts, mouseX, mouseY);
+                break;
+            case MAP_SELECT:
+                GameRenderer.drawMapSelect(g, mapCursor, MapTheme.values(), pulse, mapTrans, mapTransDir,
+                        mouseX, mouseY);
+                break;
+            case SKIN_SELECT:
+                GameRenderer.drawSkinSelect(g, p1SkinCursor, p2SkinCursor, p1Ready, p2Ready, sprites, pulse, mouseX,
+                        mouseY);
+                break;
+            case CONTROLS:
+                GameRenderer.drawControls(g, pulse, mouseX, mouseY);
+                break;
+            case SETTINGS:
+                GameRenderer.drawSettings(g, bgmOn, sfxOn, pulse, mouseX, mouseY);
+                break;
+            case EXIT_CONFIRM:
+                GameRenderer.drawExitConfirm(g, exitCursor, mouseX, mouseY);
+                break;
+            default:
+                drawGame(g);
+                break;
         }
         // Draw FPS
         g.setFont(FPS_FONT);
@@ -476,9 +511,10 @@ public class GamePanel extends JPanel
         g.drawImage(nightMask, 0, 0, null);
     }
 
-
     // ── Key input ──────────────────────────────────────────────────
-    /** Returns true if the countdown is still running (players must not act yet). */
+    /**
+     * Returns true if the countdown is still running (players must not act yet).
+     */
     private boolean isCountdownActive() {
         return (state == GameState.PLAYING || state == GameState.SLOW_MO) && countdownTick < 180;
     }
@@ -509,6 +545,10 @@ public class GamePanel extends JPanel
         }
         if (state == GameState.MAP_SELECT) {
             navMap(c);
+            return;
+        }
+        if (state == GameState.SKIN_SELECT) {
+            navSkin(e);
             return;
         }
         if (state == GameState.CONTROLS) {
@@ -562,7 +602,8 @@ public class GamePanel extends JPanel
                 p2.setDashPressed(false);
             return;
         }
-        // Always forward key-releases so held-keys don't stay stuck after countdown ends
+        // Always forward key-releases so held-keys don't stay stuck after countdown
+        // ends
         if (p1 != null)
             p1.keyReleased(c);
         if (p2 != null)
@@ -584,19 +625,21 @@ public class GamePanel extends JPanel
 
     private void selectMenu(int i) {
         switch (i) {
-            case 0 -> {
+            case 0:
                 subReturnState = state;
                 state = GameState.MAP_SELECT;
-            }
-            case 1 -> {
+                break;
+            case 1:
                 subReturnState = state;
                 state = GameState.CONTROLS;
-            }
-            case 2 -> {
+                break;
+            case 2:
                 subReturnState = state;
                 state = GameState.SETTINGS;
-            }
-            case 3 -> confirmExit();
+                break;
+            case 3:
+                confirmExit();
+                break;
         }
     }
 
@@ -646,10 +689,47 @@ public class GamePanel extends JPanel
         }
         if (c == KeyEvent.VK_ENTER || c == KeyEvent.VK_SPACE) {
             selMap = m[mapCursor];
-            startMatch();
+            p1SkinCursor = p1Skin;
+            p2SkinCursor = p2Skin;
+            p1Ready = false;
+            p2Ready = false;
+            state = GameState.SKIN_SELECT;
         }
         if (c == KeyEvent.VK_ESCAPE)
             state = GameState.MAIN_MENU;
+    }
+
+    private void navSkin(KeyEvent e) {
+        int c = e.getKeyCode();
+        int count = SpriteRenderer.getSkinCount();
+
+        // Player 1: A/D to move, F or SPACE to toggle ready
+        if (c == KeyEvent.VK_A && !p1Ready)
+            p1SkinCursor = (p1SkinCursor - 1 + count) % count;
+        if (c == KeyEvent.VK_D && !p1Ready)
+            p1SkinCursor = (p1SkinCursor + 1) % count;
+        if (c == KeyEvent.VK_F || c == KeyEvent.VK_SPACE) {
+            p1Ready = !p1Ready;
+            if (p1Ready)
+                p1Skin = p1SkinCursor;
+        }
+
+        // Player 2: Arrows to move, Right CTRL to toggle ready
+        if (c == KeyEvent.VK_LEFT && !p2Ready)
+            p2SkinCursor = (p2SkinCursor - 1 + count) % count;
+        if (c == KeyEvent.VK_RIGHT && !p2Ready)
+            p2SkinCursor = (p2SkinCursor + 1) % count;
+        if (c == KeyEvent.VK_CONTROL && e.getKeyLocation() == KeyEvent.KEY_LOCATION_RIGHT) {
+            p2Ready = !p2Ready;
+            if (p2Ready)
+                p2Skin = p2SkinCursor;
+        }
+
+        if (p1Ready && p2Ready) {
+            startMatch();
+        }
+        if (c == KeyEvent.VK_ESCAPE)
+            state = GameState.MAP_SELECT;
     }
 
     private void navSettings(int c) {
@@ -676,16 +756,20 @@ public class GamePanel extends JPanel
 
     private void selectPause(int i) {
         switch (i) {
-            case 0 -> state = prevState;
-            case 1 -> {
+            case 0:
+                state = prevState;
+                break;
+            case 1:
                 startRound();
                 state = GameState.PLAYING;
-            }
-            case 2 -> {
+                break;
+            case 2:
                 subReturnState = state;
                 state = GameState.SETTINGS;
-            }
-            case 3 -> state = GameState.MAIN_MENU;
+                break;
+            case 3:
+                state = GameState.MAIN_MENU;
+                break;
         }
     }
 
@@ -702,9 +786,15 @@ public class GamePanel extends JPanel
 
     private void selectResult(int i) {
         switch (i) {
-            case 0 -> startRound();
-            case 1 -> state = GameState.MAP_SELECT;
-            case 2 -> state = GameState.MAIN_MENU;
+            case 0:
+                startRound();
+                break;
+            case 1:
+                state = GameState.MAP_SELECT;
+                break;
+            case 2:
+                state = GameState.MAIN_MENU;
+                break;
         }
     }
 
@@ -732,6 +822,14 @@ public class GamePanel extends JPanel
             resultCursor = GameRenderer.resultHit(mouseX, mouseY);
         } else if (state == GameState.EXIT_CONFIRM) {
             exitCursor = GameRenderer.exitHit(mouseX, mouseY);
+        } else if (state == GameState.SKIN_SELECT) {
+            int hit = GameRenderer.skinHit(mouseX, mouseY);
+            if (hit >= 0) {
+                if (!p1Ready)
+                    p1SkinCursor = hit;
+                else if (!p2Ready)
+                    p2SkinCursor = hit;
+            }
         }
     }
 
@@ -760,73 +858,96 @@ public class GamePanel extends JPanel
 
     private void handleClick(int mx, int my) {
         switch (state) {
-            case LOADING -> state = GameState.MAIN_MENU;
-            case MAIN_MENU -> {
-                int i = GameRenderer.menuHit(mx, my);
-                if (i >= 0) {
-                    menuCursor = i;
-                    selectMenu(i);
+            case LOADING:
+                state = GameState.MAIN_MENU;
+                break;
+            case MAIN_MENU:
+                int mi = GameRenderer.menuHit(mx, my);
+                if (mi >= 0) {
+                    menuCursor = mi;
+                    selectMenu(mi);
                 }
-            }
-            case MAP_SELECT -> {
-                int i = GameRenderer.mapHit(mx, my, MapTheme.values().length);
-                if (i == 0) {
+                break;
+            case MAP_SELECT:
+                int mapI = GameRenderer.mapHit(mx, my, MapTheme.values().length);
+                if (mapI == 0) {
                     mapTransDir = -1;
                     mapTrans = 1;
                     mapCursor = (mapCursor - 1 + MapTheme.values().length) % MapTheme.values().length;
-                } else if (i == 1) {
+                } else if (mapI == 1) {
                     mapTransDir = 1;
                     mapTrans = 1;
                     mapCursor = (mapCursor + 1) % MapTheme.values().length;
-                } else if (i == 2) {
+                } else if (mapI == 2) {
                     selMap = MapTheme.values()[mapCursor];
-                    startMatch();
-                } else if (i >= 10) {
-                    int dot = i - 10;
+                    p1SkinCursor = p1Skin;
+                    p2SkinCursor = p2Skin;
+                    p1Ready = false;
+                    p2Ready = false;
+                    state = GameState.SKIN_SELECT;
+                } else if (mapI >= 10) {
+                    int dot = mapI - 10;
                     if (dot != mapCursor) {
                         mapTransDir = (dot > mapCursor) ? 1 : -1;
                         mapTrans = 1;
                         mapCursor = dot;
                     }
                 }
-            }
-            case CONTROLS -> {
-                int i = GameRenderer.controlsHit(mx, my);
-                if (i == 0)
+                break;
+            case SKIN_SELECT:
+                int sHit = GameRenderer.skinHit(mx, my);
+                if (sHit >= 0) {
+                    if (!p1Ready) {
+                        p1SkinCursor = sHit;
+                        p1Skin = sHit;
+                        p1Ready = true;
+                    } else if (!p2Ready) {
+                        p2SkinCursor = sHit;
+                        p2Skin = sHit;
+                        p2Ready = true;
+                    }
+                    if (p1Ready && p2Ready)
+                        startMatch();
+                }
+                break;
+            case CONTROLS:
+                int ci = GameRenderer.controlsHit(mx, my);
+                if (ci == 0)
                     state = subReturnState;
-            }
-            case SETTINGS -> {
-                int i = GameRenderer.settingsHit(mx, my);
-                if (i == 0) {
+                break;
+            case SETTINGS:
+                int si = GameRenderer.settingsHit(mx, my);
+                if (si == 0) {
                     bgmOn = !bgmOn;
                     if (bgmOn)
                         AudioManager.startBGM();
                     else
                         AudioManager.stopBGM();
-                } else if (i == 1)
+                } else if (si == 1)
                     sfxOn = !sfxOn;
-                else if (i == 2)
+                else if (si == 2)
                     state = subReturnState;
-            }
-            case PAUSED -> {
-                int i = GameRenderer.pauseHit(mx, my);
-                if (i >= 0)
-                    selectPause(i);
-            }
-            case OVER -> {
-                int i = GameRenderer.resultHit(mx, my);
-                if (i >= 0)
-                    selectResult(i);
-            }
-            case EXIT_CONFIRM -> {
-                int i = GameRenderer.exitHit(mx, my);
-                if (i >= 0) {
-                    exitCursor = i;
-                    selectExit(i);
+                break;
+            case PAUSED:
+                int pi = GameRenderer.pauseHit(mx, my);
+                if (pi >= 0)
+                    selectPause(pi);
+                break;
+            case OVER:
+                int ri = GameRenderer.resultHit(mx, my);
+                if (ri >= 0)
+                    selectResult(ri);
+                break;
+            case EXIT_CONFIRM:
+                int ei = GameRenderer.exitHit(mx, my);
+                if (ei >= 0) {
+                    exitCursor = ei;
+                    selectExit(ei);
                 }
-            }
-            case PLAYING, SLOW_MO -> {
-            }
+                break;
+            default:
+                break;
         }
     }
 }
+// IDE reload trigger
