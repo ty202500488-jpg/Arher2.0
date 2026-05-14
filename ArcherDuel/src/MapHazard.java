@@ -1,5 +1,4 @@
 import java.awt.*;
-import java.util.Random;
 
 /**
  * MapHazard — environmental hazards.
@@ -12,7 +11,7 @@ import java.util.Random;
 public class MapHazard {
 
     public enum Type {
-        FIREBALL, LAVA_POOL, ICE_PATCH, FALLING_ROCK
+        LAVA_POOL, ICE_PATCH
     }
 
     public float x, y, vx, vy;
@@ -23,13 +22,9 @@ public class MapHazard {
     private final Rectangle bounds = new Rectangle();
 
     // ── Static Color constants (avoid per-frame allocation) ────────
-    private static final Color FIRE_GLOW = new Color(255, 120, 0, 80);
-    private static final Color FIRE_HOT  = new Color(255, 255, 100, 180);
     private static final Color ICE_FILL  = new Color(180, 230, 255, 140);
     private static final Color ICE_BRD   = new Color(220, 245, 255, 200);
     private static final Color ICE_SHN   = new Color(255, 255, 255, 100);
-    private static final Color ROCK_FILL = new Color(90, 80, 70);
-    private static final Color ROCK_BRD  = new Color(120, 110, 100);
 
     public MapHazard(float x, float y, float vx, float vy, int w, int h, Type type) {
         this.x = x;
@@ -45,20 +40,9 @@ public class MapHazard {
         lifetime++;
         x += vx;
         y += vy;
-        if (type == Type.FIREBALL || type == Type.FALLING_ROCK) {
-            vy += 0.35f; // gravity
-        }
-        // Deactivate off-screen
-        if (y > GameWindow.HEIGHT + 50 || x < -100 || x > GameWindow.WIDTH + 100)
-            active = false;
-        // Lava pools persist, but fireballs die on ground hit
-        if ((type == Type.FIREBALL || type == Type.FALLING_ROCK)
-                && y >= Arena.GROUND_Y - h) {
-            y = Arena.GROUND_Y - h;
-            vx *= 0.4f;
-            vy = 0;
-            if (lifetime > 20)
-                active = false;
+        // Lava pools persist
+        if (type == Type.LAVA_POOL) {
+            // Lava pools don't fall or die on ground hit in this implementation
         }
     }
 
@@ -70,24 +54,9 @@ public class MapHazard {
     public void draw(Graphics2D g) {
         long t = System.currentTimeMillis();
         switch (type) {
-            case FIREBALL -> drawFireball(g, t);
             case LAVA_POOL -> drawLavaPool(g, t);
             case ICE_PATCH -> drawIcePatch(g);
-            case FALLING_ROCK -> drawRock(g, t);
         }
-    }
-
-    private void drawFireball(Graphics2D g, long t) {
-        float p = (float) (Math.sin(t / 80.0) * 0.5 + 0.5);
-        // Outer glow
-        g.setColor(FIRE_GLOW);
-        g.fillOval((int) x - 6, (int) y - 6, w + 12, h + 12);
-        // Core
-        g.setColor(new Color(255, 80 + (int) (p * 80), 0));
-        g.fillOval((int) x, (int) y, w, h);
-        // Inner hot
-        g.setColor(FIRE_HOT);
-        g.fillOval((int) x + 4, (int) y + 4, w - 8, h - 8);
     }
 
     private void drawLavaPool(Graphics2D g, long t) {
@@ -108,29 +77,7 @@ public class MapHazard {
         g.fillOval((int) x + 6, (int) y + 3, w / 3, h / 3);
     }
 
-    private void drawRock(Graphics2D g, long t) {
-        g.setColor(ROCK_FILL);
-        int[] rx = { (int) x, (int) x + w / 2, (int) x + w, (int) x + w * 3 / 4, (int) x + w / 4 };
-        int[] ry = { (int) y + h, (int) y, (int) y + h / 2, (int) y + h, (int) y + h };
-        g.fillPolygon(rx, ry, 5);
-        g.setColor(ROCK_BRD);
-        g.drawPolygon(rx, ry, 5);
-    }
-
     // ── Static factory methods ─────────────────────────────────────
-
-    /** Spawn a fireball from the top of the screen. */
-    public static MapHazard spawnFireball(Random rng) {
-        float sx = 100 + rng.nextFloat() * (GameWindow.WIDTH - 200);
-        float vx = (rng.nextFloat() - 0.5f) * 2f;
-        return new MapHazard(sx, -30, vx, 2f + rng.nextFloat() * 2f, 24, 24, Type.FIREBALL);
-    }
-
-    /** Spawn a falling rock. */
-    public static MapHazard spawnRock(Random rng) {
-        float sx = 100 + rng.nextFloat() * (GameWindow.WIDTH - 200);
-        return new MapHazard(sx, -20, (rng.nextFloat() - 0.5f) * 1.5f, 1.5f, 30, 20, Type.FALLING_ROCK);
-    }
 
     /** Create a static lava pool at given position. */
     public static MapHazard makeLavaPool(int x, int y, int w) {

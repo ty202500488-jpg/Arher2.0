@@ -329,7 +329,7 @@ public class GameRenderer {
         g.fillOval(centerX - 280, titleY - 80, 560, 140);
 
         // ── Title ──
-        txtSpaced(g, "ARCHER  DUEL", centerX, titleY, F72, TITLE_COL, 6);
+        txtSpaced(g, "ARCHER DUEL", centerX, titleY, F72, TITLE_COL, 6);
 
         // ── Subtitle ──
         txt(g, "1v1  Arena", centerX, subY, F14, SUB_FOR);
@@ -363,8 +363,7 @@ public class GameRenderer {
         g.setColor(bgc);
         g.fillRoundRect(cx - pw / 2 + 8, py + 8, pw - 16, ph - 70, 10, 10);
         drawMapIcon(g, m, cx, py + 8 + (ph - 70) / 2);
-        txt(g, m.displayName, cx, py + ph - 42, F20, Color.WHITE);
-        txt(g, m.description, cx, py + ph - 18, F11, CTRL_TEXT);
+        txt(g, m.displayName, cx, py + ph - 32, F20, Color.WHITE);
         // Nav arrows
         REUSABLE_RECT.setBounds(cx - 380, py + ph / 2 - 22, 80, 44);
         // Actually, drawBtn takes a Rectangle. I should probably just pass the bounds.

@@ -23,7 +23,6 @@ public class GamePanel extends JPanel
     private final List<MapHazard> hazards = new ArrayList<>();   // Active hazards like fireballs/lava
     private final ParticlePool particlePool = new ParticlePool(); // Recycled particle effects
     private final ArrowPool arrowPool = new ArrowPool();       // Recycled arrow objects
-    private int hazardTimer = 0;            // Tracks when to spawn next random hazard
 
     private static final Font FPS_FONT = new Font("Monospaced", Font.BOLD, 12);
     
@@ -131,7 +130,6 @@ public class GamePanel extends JPanel
         p2.setIceMode(selMap.hasIce);
         p2.setSpeedMult(selMap.speedMultiplier);
         hazards.clear();
-        hazardTimer = 0;
         buildHazards();
         // Reset pools
         for (Particle p : particlePool.getPool()) p.active = false;
@@ -231,14 +229,6 @@ public class GamePanel extends JPanel
             return;
         }
 
-        // 2. Spawn Map Hazards periodically
-        hazardTimer++;
-        int hiv = selMap == MapTheme.VOLCANO ? 110 : selMap == MapTheme.CASTLE ? 190 : 0;
-        if (hiv > 0 && hazardTimer >= hiv) {
-            hazardTimer = 0;
-            if (selMap == MapTheme.VOLCANO) hazards.add(MapHazard.spawnFireball(rng));
-            else hazards.add(MapHazard.spawnRock(rng));
-        }
 
         // 3. Update Entities
         arena.tick();
