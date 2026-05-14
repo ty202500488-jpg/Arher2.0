@@ -1,5 +1,4 @@
 import java.awt.*;
-import java.awt.image.BufferedImage;
 import java.util.List;
 
 public class GameRenderer {
@@ -154,21 +153,6 @@ public class GameRenderer {
         }
         return -1;
     }
-
-    static int skinHit(int mx, int my) {
-        int count = SpriteRenderer.getSkinCount();
-        int itemW = 140, gap = 20;
-        int totalW = count * itemW + (count - 1) * gap;
-        int startX = W / 2 - totalW / 2;
-        int y = H / 2 - 80;
-        for (int i = 0; i < count; i++) {
-            int x = startX + i * (itemW + gap);
-            if (mx >= x && mx <= x + itemW && my >= y && my <= y + 200)
-                return i;
-        }
-        return -1;
-    }
-
 
     // ── Draw utilities ─────────────────────────────────────────────
     static void txt(Graphics2D g, String s, int cx, int y, Font f, Color c) {
@@ -408,60 +392,6 @@ public class GameRenderer {
         txt(g, "◄ ►  Change Map     ESC = Back", cx, H - 22, F11, HINT_COL);
     }
 
-    // ── SKIN SELECT ───────────────────────────────────────────────
-    static void drawSkinSelect(Graphics2D g, int p1Cur, int p2Cur, boolean p1Ready, boolean p2Ready, SpriteRenderer sprites,
-            float pulse, int mx, int my) {
-        bg(g, DARK, new Color(20, 20, 45));
-        int cx = W / 2;
-        txt(g, "SELECT YOUR CHARACTERS", cx, 60, F36, TITLE_COL);
-
-        int count = SpriteRenderer.getSkinCount();
-        int itemW = 140, gap = 20;
-        int totalW = count * itemW + (count - 1) * gap;
-        int startX = cx - totalW / 2;
-
-        for (int i = 0; i < count; i++) {
-            int x = startX + i * (itemW + gap);
-            int y = H / 2 - 80;
-
-            boolean p1Sel = (i == p1Cur);
-            boolean p2Sel = (i == p2Cur);
-            boolean hov = mx >= x && mx <= x + itemW && my >= y && my <= y + 200;
-
-            if (p1Sel || p2Sel || hov) {
-                g.setColor(new Color(230, 185, 55, 30));
-                g.fillRoundRect(x - 5, y - 5, itemW + 10, 210, 15, 15);
-            }
-            panel(g, x, y, itemW, 200);
-
-            // Draw archer preview
-            BufferedImage fr = sprites.getFrame(i, SpriteRenderer.ANIM_IDLE, (int) (System.currentTimeMillis() / 150) % 4,
-                    true);
-            g.drawImage(fr, x + itemW / 2 - SpriteRenderer.FRAME_W / 2, y + 40, null);
-
-            txt(g, SpriteRenderer.getSkinName(i), x + itemW / 2, y + 160, F14, (p1Sel || p2Sel) ? AMBER : Color.WHITE);
-
-            // P1 selection box (Blue)
-            if (p1Sel) {
-                g.setColor(p1Ready ? FIGHT_COL : HUD_BLUE);
-                g.setStroke(STROKE3);
-                g.drawRoundRect(x + 4, y + 4, itemW - 8, 200 - 8, 10, 10);
-                txt(g, p1Ready ? "P1 READY" : "P1 SELECT", x + itemW / 2, y + 22, F11, p1Ready ? FIGHT_COL : HUD_BLUE);
-            }
-            // P2 selection box (Red)
-            if (p2Sel) {
-                g.setColor(p2Ready ? FIGHT_COL : HUD_RED);
-                g.setStroke(STROKE3);
-                g.drawRoundRect(x + 8, y + 8, itemW - 16, 200 - 16, 10, 10);
-                txt(g, p2Ready ? "P2 READY" : "P2 SELECT", x + itemW / 2, y + 188, F11, p2Ready ? FIGHT_COL : HUD_RED);
-            }
-        }
-
-        g.setStroke(STROKE1);
-        txt(g, "P1: WASD + F/SPACE", cx - 220, H - 40, F14, HUD_BLUE);
-        txt(g, "P2: Arrows + RCTRL", cx + 220, H - 40, F14, HUD_RED);
-    }
-
     // ── CONTROLS ──────────────────────────────────────────────────
     static void drawControls(Graphics2D g, float pulse, int mx, int my) {
         bg(g, DARK, new Color(18, 14, 32));
@@ -631,22 +561,14 @@ public class GameRenderer {
 
     // ── MAP HELPERS ───────────────────────────────────────────────
     static Color mapCol(MapTheme m) {
-        switch (m) {
-            case FOREST:
-                return new Color(18, 55, 22);
-            case CASTLE:
-                return new Color(35, 30, 55);
-            case VOLCANO:
-                return new Color(80, 25, 10);
-            case ICE:
-                return new Color(60, 110, 160);
-            case SKY_ISLANDS:
-                return new Color(80, 120, 200);
-            case NIGHT:
-                return new Color(10, 10, 30);
-            default:
-                return Color.GRAY;
-        }
+        return switch (m) {
+            case FOREST -> new Color(18, 55, 22);
+            case CASTLE -> new Color(35, 30, 55);
+            case VOLCANO -> new Color(80, 25, 10);
+            case ICE -> new Color(60, 110, 160);
+            case SKY_ISLANDS -> new Color(80, 120, 200);
+            case NIGHT -> new Color(10, 10, 30);
+        };
     }
 
     static void drawMapIcon(Graphics2D g, MapTheme m, int cx, int cy) {

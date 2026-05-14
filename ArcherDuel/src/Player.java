@@ -51,16 +51,14 @@ public class Player {
 
     private final AnimationController anim = new AnimationController();
     private final SpriteRenderer sprites;
-    private int skinIndex;
     public final List<Arrow> arrows = new ArrayList<>();
 
-    public Player(int idx, float sx, float sy, SpriteRenderer sp, ArrowPool ap, int skin) {
+    public Player(int idx, float sx, float sy, SpriteRenderer sp, ArrowPool ap) {
         playerIndex = idx;
         x = sx;
         y = sy;
         sprites = sp;
         arrowPool = ap;
-        skinIndex = skin;
         facingRight = (idx == 0);
         if (idx == 0) {
             KEY_L = KeyEvent.VK_A;
@@ -369,7 +367,7 @@ public class Player {
                 a.draw(g);
             return;
         }
-        BufferedImage fr = sprites.getFrame(skinIndex, anim.getAnimation(), anim.getFrame(), facingRight);
+        BufferedImage fr = sprites.getFrame(playerIndex, anim.getAnimation(), anim.getFrame(), facingRight);
         g.drawImage(fr, (int) x + W / 2 - SpriteRenderer.FRAME_W / 2, (int) y + H - SpriteRenderer.FRAME_H + 4, null);
         if (charging && chargeTicks > 0) {
             float r = getChargeRatio();

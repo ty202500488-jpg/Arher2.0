@@ -11,6 +11,5 @@ public enum GameState {
     OVER,
     PAUSED,
     SETTINGS,
-    EXIT_CONFIRM,
-    SKIN_SELECT
+    EXIT_CONFIRM
 }

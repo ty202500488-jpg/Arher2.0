@@ -22,7 +22,7 @@ public class SpriteRenderer {
     public static final int[] FRAME_COUNTS = { 4, 6, 6, 6, 4 };
 
     private static final Color[][] PALETTES = {
-            // Skin 0: Frost Archer (Blue/Cyan/Silver)
+            // Player 1 — Frost Archer (Blue/Cyan/Silver)
             {
                     new Color(30, 40, 90), // 0: Armor Main
                     new Color(100, 200, 255), // 1: Highlight
@@ -32,7 +32,7 @@ public class SpriteRenderer {
                     new Color(0, 150, 255), // 5: Cape
                     new Color(80, 120, 255, 120) // 6: Particle Aura
             },
-            // Skin 1: Ember Archer (Red/Gold/Charcoal)
+            // Player 2 — Ember Archer (Red/Gold/Charcoal)
             {
                     new Color(60, 20, 20), // 0: Armor Main
                     new Color(255, 180, 50), // 1: Highlight
@@ -41,61 +41,16 @@ public class SpriteRenderer {
                     new Color(255, 255, 100), // 4: String/Glow
                     new Color(200, 50, 30), // 5: Cape
                     new Color(255, 100, 0, 130) // 6: Particle Aura
-            },
-            // Skin 2: Forest Guardian (Green/Leaf/Bark)
-            {
-                    new Color(20, 50, 20),
-                    new Color(140, 255, 100),
-                    new Color(210, 180, 140),
-                    new Color(40, 80, 20),
-                    new Color(180, 255, 180),
-                    new Color(30, 120, 30),
-                    new Color(50, 255, 50, 120)
-            },
-            // Skin 3: Shadow Stalker (Purple/Dark/Void)
-            {
-                    new Color(25, 15, 45),
-                    new Color(180, 100, 255),
-                    new Color(200, 200, 200),
-                    new Color(70, 30, 100),
-                    new Color(220, 150, 255),
-                    new Color(45, 10, 70),
-                    new Color(180, 100, 255, 120)
-            },
-            // Skin 4: Royal Guard (Gold/White/Blue)
-            {
-                    new Color(200, 160, 40),
-                    new Color(255, 240, 180),
-                    new Color(245, 215, 190),
-                    new Color(220, 180, 60),
-                    new Color(255, 255, 255),
-                    new Color(40, 80, 200),
-                    new Color(255, 220, 100, 120)
             }
     };
 
-    private final BufferedImage[] sheets = new BufferedImage[PALETTES.length];
+    private final BufferedImage[] sheets = new BufferedImage[2];
     private final Random rand = new Random();
 
     public SpriteRenderer() {
-        for (int p = 0; p < PALETTES.length; p++) {
+        for (int p = 0; p < 2; p++) {
             sheets[p] = buildSheet(p);
         }
-    }
-
-    public static int getSkinCount() {
-        return PALETTES.length;
-    }
-
-    public static String getSkinName(int i) {
-        return switch (i) {
-            case 0 -> "Frost Archer";
-            case 1 -> "Ember Archer";
-            case 2 -> "Forest Guardian";
-            case 3 -> "Shadow Stalker";
-            case 4 -> "Royal Guard";
-            default -> "Unknown";
-        };
     }
 
     public BufferedImage getFrame(int player, int animRow, int frame, boolean facingRight) {
