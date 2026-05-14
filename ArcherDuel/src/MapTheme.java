@@ -7,8 +7,7 @@ public enum MapTheme {
     CASTLE("Castle Walls", "Vertical combat + narrow ledges", 1.0f, false, false, false, false),
     VOLCANO("Volcano", "Rising lava + falling fireballs", 1.0f, false, false, true, false),
     ICE("Ice Cavern", "Slippery floors + cracking ice", 1.0f, false, true, false, false),
-    SKY_ISLANDS("Sky Islands", "Strong wind + fall = death", 1.0f, true, false, false, true),
-    NIGHT("Night Arena", "Limited vision + torch light", 1.0f, false, false, false, false);
+    SKY_ISLANDS("Sky Islands", "Strong wind + fall = death", 1.0f, true, false, false, true);
 
     public final String displayName;
     public final String description;

@@ -27,8 +27,6 @@ public class GamePanel extends JPanel
 
     private static final Font FPS_FONT = new Font("Monospaced", Font.BOLD, 12);
     
-    // ── Visual Overlay Constants ──────────────────────────────────────
-    private static final Color NIGHT_BASE_OVERLAY = new Color(0, 0, 0, 215);
 
     // ── Game State Management ─────────────────────────────────────────
     private GameState state = GameState.LOADING; 
@@ -86,8 +84,6 @@ public class GamePanel extends JPanel
     private boolean pulseUp = true;
     private final Random rng = new Random();
     private BufferedImage buffer;
-    private BufferedImage nightMask;
-    private BufferedImage lightSprite;
     private final Timer timer;
 
     public GamePanel() {
@@ -105,11 +101,6 @@ public class GamePanel extends JPanel
         }
         timer = new Timer(TICK_MS, this);
         timer.start();
-        try {
-            lightSprite = javax.imageio.ImageIO.read(new java.io.File("assets/fx/light.png"));
-        } catch (Exception e) {
-            System.err.println("Could not load light sprite");
-        }
         if (bgmOn)
             AudioManager.startBGM();
     }
@@ -456,8 +447,6 @@ public class GamePanel extends JPanel
         }
         g.translate(ox, oy);
         arena.draw(g);
-        if (selMap == MapTheme.NIGHT)
-            drawNight(g);
         hazards.forEach(h -> h.draw(g));
         p1.draw(g);
         p2.draw(g);
@@ -479,28 +468,6 @@ public class GamePanel extends JPanel
             GameRenderer.drawPause(g, pauseCursor, mouseX, mouseY);
     }
 
-    private void drawNight(Graphics2D g) {
-        if (nightMask == null || nightMask.getWidth() != GameWindow.WIDTH) {
-            nightMask = new BufferedImage(GameWindow.WIDTH, GameWindow.HEIGHT, BufferedImage.TYPE_INT_ARGB);
-        }
-        Graphics2D dg = nightMask.createGraphics();
-        dg.setComposite(AlphaComposite.Src);
-        dg.setColor(NIGHT_BASE_OVERLAY);
-        dg.fillRect(0, 0, GameWindow.WIDTH, GameWindow.HEIGHT);
-
-        if (lightSprite != null) {
-            dg.setComposite(AlphaComposite.getInstance(AlphaComposite.DST_OUT));
-            for (Player pp : new Player[] { p1, p2 }) {
-                if (!pp.isAlive())
-                    continue;
-                int r = 175;
-                int cx = (int) pp.getCenterX() - r, cy = (int) pp.getCenterY() - r;
-                dg.drawImage(lightSprite, cx, cy, r * 2, r * 2, null);
-            }
-        }
-        dg.dispose();
-        g.drawImage(nightMask, 0, 0, null);
-    }
 
 
     // ── Key input ──────────────────────────────────────────────────

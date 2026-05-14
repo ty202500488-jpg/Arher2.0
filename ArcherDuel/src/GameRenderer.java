@@ -567,7 +567,6 @@ public class GameRenderer {
             case VOLCANO -> new Color(80, 25, 10);
             case ICE -> new Color(60, 110, 160);
             case SKY_ISLANDS -> new Color(80, 120, 200);
-            case NIGHT -> new Color(10, 10, 30);
         };
     }
 
@@ -610,17 +609,6 @@ public class GameRenderer {
                 int[] ix = { cx - 210, cx - 70, cx + 70, cx + 180, cx - 140 };
                 for (int i = 0; i < 5; i++)
                     g.fillRoundRect(ix[i], iy[i], 75, 12, 8, 8);
-            }
-            case NIGHT -> {
-                g.setColor(new Color(18, 18, 38));
-                g.fillRect(cx - 260, cy - 75, 520, 165);
-                g.setColor(new Color(28, 28, 52));
-                g.fillRect(cx - 240, cy + 25, 520, 12);
-                g.fillRect(cx - 150, cy - 5, 300, 12);
-                g.setColor(new Color(240, 240, 210));
-                g.fillOval(cx + 200, cy - 75, 30, 30);
-                g.setColor(new Color(10, 10, 28));
-                g.fillOval(cx + 212, cy - 83, 30, 30);
             }
         }
     }

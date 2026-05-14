@@ -92,20 +92,6 @@ public class Arena {
     private static final Color SK_AMB_G    = new Color(255, 240, 180, 30);
     private static final Color SK_AMB_C    = new Color(255, 255, 220, 200);
     private static final Font  SK_FONT     = new java.awt.Font("Monospaced", java.awt.Font.BOLD, 14);
-    // NIGHT
-    private static final Color NC_BG1      = new Color(4, 4, 16);
-    private static final Color NC_BG2      = new Color(10, 10, 26);
-    private static final Color NC_STAR     = new Color(255, 255, 255, 200);
-    private static final Color NC_MOON1    = new Color(242, 242, 212);
-    private static final Color NC_MOON2    = new Color(4, 4, 16);
-    private static final Color NC_MOON_G   = new Color(255, 255, 200, 12);
-    private static final Color NC_RUIN     = new Color(10, 10, 22);
-    private static final Color NC_MIST0    = new Color(18, 18, 42, 0);
-    private static final Color NC_MIST1    = new Color(12, 12, 32, 200);
-    private static final Color NC_PLAT_S   = new Color(28, 28, 48);
-    private static final Color NC_PLAT_M   = new Color(38, 58, 34);
-    private static final Color NC_AMB_G    = new Color(255, 200, 80, 32);
-    private static final Color NC_AMB_C    = new Color(255, 230, 120, 205);
     // Shared / decorations
     private static final Color BAR_BODY    = new Color(120, 70, 30);
     private static final Color BAR_RIM     = new Color(160, 100, 50);
@@ -162,7 +148,6 @@ public class Arena {
             case VOLCANO -> drawVolcano(g);
             case ICE -> drawIce(g);
             case SKY_ISLANDS -> drawSky(g);
-            case NIGHT -> drawNight(g);
         }
         drawMovingPlatformGlow(g);
     }
@@ -328,30 +313,6 @@ public class Arena {
         return;
     }
 
-    // ── NIGHT ─────────────────────────────────────────────────────
-    private void drawNight(Graphics2D g) {
-        grad(g, NC_BG1, NC_BG2);
-        // Stars
-        long t = System.currentTimeMillis();
-        g.setColor(NC_STAR);
-        for (int[] p : pts) { float tw=(float)(Math.sin(t/800.0+p[2])*0.5+0.5); if (tw>0.35f) g.fillOval(p[0], p[1]%280, 2, 2); }
-        // Crescent moon
-        g.setColor(NC_MOON1); g.fillOval(W()-140, 25, 80, 80);
-        g.setColor(NC_MOON2);       g.fillOval(W()-115, 15, 80, 80);
-        g.setColor(NC_MOON_G);  g.fillOval(W()-162,5,122,122);
-        // Distant ruins silhouette
-        g.setColor(NC_RUIN);
-        for (int[] b : new int[][]{{50,350,60},{200,320,40},{500,340,70},{750,310,55},{1000,345,65},{1200,330,50}}) {
-            g.fillRect(b[0], b[1], b[2], HEIGHT-b[1]);
-            for (int wx=b[0]; wx<b[0]+b[2]; wx+=14) g.fillRect(wx, b[1]-10, 8, 12);
-        }
-        // Ground mist
-        g.setPaint(new GradientPaint(0, GROUND_Y-38, NC_MIST0, 0, GROUND_Y, NC_MIST1));
-        g.fillRect(0, GROUND_Y-38, W(), 38); g.setPaint(null);
-        drawAllPlatforms(g, NC_PLAT_S, NC_PLAT_M, false);
-        drawTorches(g);
-        drawAmb(g, NC_AMB_G, NC_AMB_C);
-    }
 
     // ── CASTLE BACKGROUND ────────────────────────────────────────────
     private void drawCastleBG(Graphics2D g) {
@@ -476,24 +437,6 @@ public class Arena {
     }
 
 
-    private void drawTorches(Graphics2D g) {
-        long t = System.currentTimeMillis();
-        int[] ti = { 1, 2, 8, 9 };
-        for (int pi : ti) {
-            if (pi >= data.platforms.length)
-                continue;
-            Rectangle r = data.platforms[pi];
-            for (int tx : new int[] { r.x + 12, r.x + r.width - 16 }) {
-                float p = (float) (Math.sin(t / 180.0 + tx) * 0.3 + 0.7);
-                g.setColor(new Color(255, 160, 0, (int) (p * 55)));
-                g.fillOval(tx - 35, r.y - 75, 70, 70);
-                g.setColor(new Color(160, 80, 30));
-                g.fillRect(tx - 3, r.y - 18, 6, 18);
-                g.setColor(new Color(255, 180, 0, (int) (p * 220)));
-                g.fillOval(tx - 5, r.y - 24, 10, 12);
-            }
-        }
-    }
 
     private void drawMovingPlatformGlow(Graphics2D g) {
         if (data.theme == MapTheme.FOREST) return;

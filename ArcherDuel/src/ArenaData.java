@@ -93,22 +93,6 @@ public class ArenaData {
             { W / 2 - 100, GY - 650, 200, 20 },
     };
 
-    // ── NIGHT — symmetric, torch-lit arena ────────────────────────
-    // Every platform chains cleanly. vert gaps=120, horiz gaps<=150.
-    static final int[][] L_NIGHT = {
-            { 0, GY, W, 90 },
-            { 60, GY - 120, 230, 22 },
-            { W - 290, GY - 120, 230, 22 },
-            { 180, GY - 240, 220, 20 },
-            { W - 400, GY - 240, 220, 20 },
-            { W / 2 - 160, GY - 240, 320, 20 },
-            { 100, GY - 360, 220, 20 },
-            { W - 320, GY - 360, 220, 20 },
-            { W / 2 - 190, GY - 360, 380, 22 },
-            { 250, GY - 480, 190, 20 },
-            { W - 440, GY - 480, 190, 20 },
-            { W / 2 - 110, GY - 600, 220, 20 },
-    };
 
     // ── Moving platform descriptors ────────────────────────────────
     // { platIdx, min, max, speed*100, isHoriz(1)/isVert(0) }
@@ -141,7 +125,6 @@ public class ArenaData {
             case VOLCANO -> L_VOLCANO;
             case ICE -> L_ICE;
             case SKY_ISLANDS -> L_SKY;
-            case NIGHT -> L_NIGHT;
         };
         platforms = new Rectangle[layout.length];
         for (int i = 0; i < layout.length; i++)
